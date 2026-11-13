@@ -1,0 +1,644 @@
+<title>Cronogramas Everest</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500&display=swap">
+<style>
+/* Layout: barra fixa no topo, resumo de status que também filtra, calendário mensal (lista no celular), gaveta lateral com o post e os comentários.
+   Tokens no padrão shadcn/ui (tema zinc, raio 0.5rem). Tipografia: Avenir regular. */
+:root{
+  --background:#FFFFFF; --foreground:#09090B; --muted:#F4F4F5; --muted-foreground:#71717A;
+  --border:#E4E4E7; --primary:#18181B; --primary-foreground:#FAFAFA; --ring:#A1A1AA;
+  --ok:#10B981; --wait:#F59E0B; --fix:#EF4444; --hold:#A1A1AA; --done:#3B82F6; --anim:#8B5CF6;
+  --radius:.5rem;
+  --font:"Avenir","Avenir Next","Avenir LT Std","Nunito Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --shadow:0 10px 38px rgba(9,9,11,.14);
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --background:#09090B; --foreground:#FAFAFA; --muted:#1F1F23; --muted-foreground:#A1A1AA;
+  --border:#27272A; --primary:#FAFAFA; --primary-foreground:#18181B; --ring:#52525B;
+  --ok:#34D399; --wait:#FBBF24; --fix:#F87171; --hold:#71717A; --done:#60A5FA; --anim:#A78BFA;
+  --shadow:0 10px 38px rgba(0,0,0,.6); color-scheme:dark } }
+:root[data-theme="dark"]{
+  --background:#09090B; --foreground:#FAFAFA; --muted:#1F1F23; --muted-foreground:#A1A1AA;
+  --border:#27272A; --primary:#FAFAFA; --primary-foreground:#18181B; --ring:#52525B;
+  --ok:#34D399; --wait:#FBBF24; --fix:#F87171; --hold:#71717A; --done:#60A5FA; --anim:#A78BFA;
+  --shadow:0 10px 38px rgba(0,0,0,.6); color-scheme:dark }
+
+*{box-sizing:border-box}
+body{background:var(--background);color:var(--foreground);font-family:var(--font);font-weight:400;font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--ring);outline-offset:2px}
+.wrap{max-width:1160px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--background)}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--background);border-bottom:1px solid var(--border)}
+.top .wrap{display:flex;flex-wrap:wrap;align-items:center;gap:8px 20px;padding-block:14px}
+.brand{min-width:0;flex:1 1 240px}
+.brand small{display:block;font-size:12px;color:var(--muted-foreground)}
+.brand h1{font-size:18px;font-weight:500;margin:0;line-height:1.3;letter-spacing:-.01em;text-wrap:balance}
+.who{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted-foreground)}
+/* Tabs */
+.seg{display:inline-flex;background:var(--muted);border-radius:var(--radius);padding:3px;gap:2px}
+.seg button{border:0;background:none;padding:5px 12px;border-radius:calc(var(--radius) - 2px);color:var(--muted-foreground);font-size:13px}
+.seg button[aria-pressed="true"]{background:var(--background);color:var(--foreground);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+
+main.wrap{padding-block:20px 56px;display:flex;flex-direction:column;gap:16px}
+.note{font-size:13px;color:var(--muted-foreground);margin:0;max-width:75ch}
+.bar{display:flex;height:4px;border-radius:2px;overflow:hidden;background:var(--muted);gap:2px}
+.bar span{display:block;min-width:2px;border-radius:2px}
+.tools{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+
+.s-aprovado{--c:var(--ok)} .s-em_aprovacao{--c:var(--wait)} .s-ajuste{--c:var(--fix)}
+.s-insumos{--c:var(--hold)} .s-postado{--c:var(--done)} .s-anim{--c:var(--anim)}
+.s-none{--c:transparent}
+.dot{width:8px;height:8px;border-radius:50%;flex:none;background:var(--c)}
+.s-none .dot,.pill.s-none::before,.ev.s-none::before{box-shadow:inset 0 0 0 1px var(--ring)}
+/* Badge (outline) */
+.chip,.pill{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--border);background:var(--background);border-radius:999px;white-space:nowrap}
+.chip{padding:4px 11px;font-size:13px}
+.chip b{font-weight:400;color:var(--muted-foreground);font-variant-numeric:tabular-nums}
+.chip:hover{background:var(--muted)}
+.chip[aria-pressed="true"]{background:var(--primary);color:var(--primary-foreground);border-color:var(--primary)}
+.chip[aria-pressed="true"] b{color:inherit;opacity:.7}
+.pill{padding:1px 9px;font-size:12px}
+.pill::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--c)}
+
+/* calendário */
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;background:var(--border);gap:1px}
+.cal .dow{background:var(--background);padding:8px;font-size:12px;color:var(--muted-foreground)}
+.day{background:var(--background);min-height:108px;padding:6px;display:flex;flex-direction:column;gap:3px;min-width:0}
+.day.off{background:var(--muted)}
+.day .num{font-size:12px;color:var(--muted-foreground);font-variant-numeric:tabular-nums;padding:0 2px 2px}
+.day.today .num{color:var(--primary-foreground);background:var(--primary);border-radius:999px;padding:0 7px;align-self:flex-start;margin-bottom:2px}
+.ev{display:flex;align-items:center;gap:7px;width:100%;text-align:left;border:0;border-radius:calc(var(--radius) - 2px);padding:3px 6px;background:none;font-size:13px;min-width:0}
+.ev::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--c);flex:none}
+.ev:hover,.row:hover{background:var(--muted)}
+.ev span.t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;flex:1}
+.ev .mk{font-size:11px;flex:none;color:var(--muted-foreground)}
+.ev.dim,.row.dim{opacity:.25}
+
+/* lista */
+.list{display:flex;flex-direction:column;gap:20px}
+.grp h2{font-size:13px;font-weight:400;color:var(--muted-foreground);margin:0 0 6px}
+.rows{border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.row{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;width:100%;text-align:left;border:0;border-top:1px solid var(--border);background:none;padding:8px 12px}
+.row:first-child{border-top:0}
+.row .th{width:30px;height:40px;border-radius:4px;flex:none;object-fit:cover;background:var(--muted);border:1px solid var(--border)}
+.row .f{width:76px;flex:none}
+.row .sum{flex:1 1 200px;min-width:0;color:var(--muted-foreground);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .meta{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.cnt{font-size:12px;color:var(--muted-foreground);font-variant-numeric:tabular-nums}
+.empty{padding:28px;text-align:center;color:var(--muted-foreground)}
+
+@media (max-width:760px){
+  #cal{display:none}
+  #list[hidden]{display:flex!important}
+  #viewseg{display:none}
+}
+
+/* Sheet */
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:20}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(560px,100%);z-index:21;background:var(--background);border-left:1px solid var(--border);box-shadow:var(--shadow);display:flex;flex-direction:column;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);padding-right:env(safe-area-inset-right,0px)}
+.dh{display:flex;align-items:flex-start;gap:12px;padding:18px 20px 14px}
+.dh h2{font-size:18px;font-weight:500;margin:0;line-height:1.3;letter-spacing:-.01em;flex:1;min-width:0;text-wrap:balance}
+.dh small{display:block;font-size:13px;font-weight:400;color:var(--muted-foreground);letter-spacing:0}
+.x{border:0;background:none;border-radius:calc(var(--radius) - 2px);width:30px;height:30px;font-size:18px;line-height:1;flex:none;color:var(--muted-foreground)}
+.x:hover{background:var(--muted);color:var(--foreground)}
+.db{overflow-y:auto;padding:4px 20px 20px;display:flex;flex-direction:column;gap:20px;flex:1}
+.ctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.ctl select,.tog{border:1px solid var(--border);background:var(--background);border-radius:calc(var(--radius) - 2px);padding:6px 10px;height:34px;font-size:13px}
+.tog:hover{background:var(--muted)}
+.tog[aria-pressed="true"]{background:var(--primary);color:var(--primary-foreground);border-color:var(--primary)}
+.sec h3{font-size:13px;color:var(--muted-foreground);margin:0 0 6px;font-weight:400}
+.sec p{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;max-width:65ch}
+.sec a{color:inherit;text-decoration:underline;text-underline-offset:3px}
+.frames{display:flex;gap:10px;overflow-x:auto;padding:2px 2px 8px}
+.frame{position:relative;flex:none;height:300px;border-radius:var(--radius);border:1px solid var(--border);cursor:crosshair;overflow:hidden;
+  background:repeating-linear-gradient(135deg,var(--muted) 0 10px,var(--background) 10px 20px);display:flex;align-items:flex-end;padding:8px;font-size:11px;color:var(--muted-foreground)}
+.frame.v{aspect-ratio:9/16} .frame.q{aspect-ratio:4/5}
+.frame img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;max-width:none}
+.frame span.lb{position:relative;background:var(--background);border:1px solid var(--border);border-radius:4px;padding:0 6px}
+.pin{position:absolute;transform:translate(-50%,-50%);width:22px;height:22px;border-radius:50%;background:var(--primary);color:var(--primary-foreground);font-size:11px;display:grid;place-items:center;box-shadow:0 0 0 2px var(--background);pointer-events:none}
+.pin.new{background:var(--background);color:var(--foreground);box-shadow:0 0 0 2px var(--primary)}
+.pin.ok{background:var(--ok);color:#fff}
+.files{border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.sec a.file{display:flex;align-items:center;gap:10px;padding:7px 10px;border-top:1px solid var(--border);text-decoration:none;font-size:13px}
+.sec a.file:first-child{border-top:0}
+.sec a.file:hover{background:var(--muted)}
+.file .fn{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.file .go{color:var(--muted-foreground);font-size:12px;white-space:nowrap}
+.cm{display:flex;flex-direction:column;gap:8px}
+.c{border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;display:flex;flex-direction:column;gap:4px}
+.c.done{opacity:.55}
+.c .hd{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center;font-size:12px;color:var(--muted-foreground)}
+.c .hd b{color:var(--foreground);font-weight:500;font-size:13px}
+.tag{font-size:11px;border-radius:4px;padding:0 6px;background:var(--muted);color:var(--muted-foreground)}
+.c p{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+.lnk{border:0;background:none;color:var(--foreground);padding:0;font-size:12px;margin-left:auto;text-decoration:underline;text-underline-offset:3px}
+.df{border-top:1px solid var(--border);padding:12px 20px;display:flex;flex-direction:column;gap:8px}
+.df textarea{width:100%;min-height:64px;resize:vertical;border:1px solid var(--border);border-radius:calc(var(--radius) - 2px);padding:8px 10px;background:var(--background)}
+.df textarea::placeholder{color:var(--muted-foreground)}
+.df .r{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.df .r .pinmsg{font-size:12px;color:var(--muted-foreground);flex:1;min-width:0}
+.btn{border:0;background:var(--primary);color:var(--primary-foreground);border-radius:calc(var(--radius) - 2px);padding:0 16px;height:34px;font-size:13px}
+.btn:hover{opacity:.9}
+@media (prefers-reduced-motion:no-preference){.drawer{animation:in .18s ease-out}@keyframes in{from{transform:translateX(24px);opacity:.6}}}
+
+
+/* ---------- visão macro: canvas de meses, interface em texto nos quatro cantos ---------- */
+html.home,html.home body{height:100%;overflow:hidden;overscroll-behavior:none}
+.board{position:fixed;inset:0;overflow:hidden;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
+.board.drag{cursor:grabbing}
+.world{position:absolute;left:0;top:0;transform-origin:0 0;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:140px 150px;padding:80px;width:2600px;will-change:transform}
+.cluster{all:unset;box-sizing:border-box;position:relative;display:block;cursor:pointer;flex:none}
+.cluster .thumbs{display:flex;flex-wrap:wrap;gap:10px;width:1180px;align-items:flex-start}
+.cluster .thumbs img{height:150px;object-fit:cover;max-width:none;display:block;border-radius:3px;pointer-events:none}
+.cluster.empty{width:420px;height:300px;display:grid;place-items:center}
+.mlabel{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:120px;font-weight:500;letter-spacing:-.04em;line-height:1;white-space:nowrap;color:var(--foreground);
+  text-shadow:0 0 0 var(--background),4px 0 0 var(--background),-4px 0 0 var(--background),0 4px 0 var(--background),0 -4px 0 var(--background),3px 3px 0 var(--background),-3px -3px 0 var(--background),3px -3px 0 var(--background),-3px 3px 0 var(--background)}
+.mlabel sup{font-size:.28em;font-weight:400;color:var(--muted-foreground);letter-spacing:0;margin-left:6px;vertical-align:top;position:relative;top:.3em}
+.cluster.empty .mlabel{color:var(--ring);font-size:84px}
+.msub{position:absolute;left:50%;top:calc(50% + 78px);transform:translateX(-50%);white-space:nowrap;font-size:20px;background:var(--background);padding:2px 10px;color:var(--muted-foreground)}
+.cluster.empty .msub{top:calc(50% + 56px);font-size:16px}
+.cluster:hover .mlabel{text-decoration:underline;text-decoration-thickness:4px;text-underline-offset:10px}
+.cluster:focus-visible{outline:3px solid var(--ring);outline-offset:20px}
+.corner{position:fixed;z-index:3;background:var(--background);padding:4px 8px;font-size:14px;display:flex;align-items:center;gap:12px}
+.corner.tl{top:calc(12px + env(safe-area-inset-top,0px));left:calc(10px + env(safe-area-inset-left,0px))}
+.corner.tr{top:calc(12px + env(safe-area-inset-top,0px));right:calc(10px + env(safe-area-inset-right,0px))}
+.corner.bl{bottom:calc(12px + env(safe-area-inset-bottom,0px));left:calc(10px + env(safe-area-inset-left,0px));color:var(--muted-foreground);font-size:13px}
+.corner.br{bottom:calc(12px + env(safe-area-inset-bottom,0px));right:calc(10px + env(safe-area-inset-right,0px));font-variant-numeric:tabular-nums}
+.corner b{font-weight:500}.corner .mut{color:var(--muted-foreground)}
+@media (max-width:640px){.corner.bl{display:none}.mebar .me span.nm{display:none}}
+
+/* ---------- barra de perfil ---------- */
+.mebar{display:flex;align-items:center;gap:14px;font-size:13px}
+.tbtn{all:unset;cursor:pointer;color:var(--muted-foreground);display:inline-flex;align-items:center;gap:6px}
+.tbtn:hover{color:var(--foreground)}
+.tbtn:focus-visible{outline:2px solid var(--ring);outline-offset:3px}
+.badge{background:var(--fix);color:#fff;border-radius:999px;font-size:11px;min-width:17px;height:17px;display:inline-grid;place-items:center;padding:0 5px}
+.me{display:inline-flex;align-items:center;gap:7px}
+.av{width:22px;height:22px;border-radius:50%;object-fit:cover;flex:none;background:var(--muted)}
+.banner{font-size:13px;border:1px solid var(--border);border-radius:var(--radius);padding:8px 12px;color:var(--muted-foreground);margin:0}
+.back{all:unset;cursor:pointer;color:var(--muted-foreground);font-size:13px}
+.back:hover{color:var(--foreground)}
+
+/* ---------- visão slides: um slide por post ---------- */
+.slides{display:flex;flex-direction:column;gap:20px}
+.slide{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);border:1px solid var(--border);border-radius:calc(var(--radius) + 4px);overflow:hidden;aspect-ratio:16/9;background:var(--background)}
+.sl-l{padding:28px 30px;display:flex;flex-direction:column;gap:14px;min-width:0;overflow-y:auto}
+.sl-meta{display:flex;justify-content:space-between;gap:10px;font-size:13px;color:var(--muted-foreground)}
+.sl-l h3{margin:0;font-size:24px;font-weight:500;letter-spacing:-.02em;line-height:1.2;text-wrap:balance}
+.sl-t h4{margin:0 0 3px;font-size:12px;font-weight:400;color:var(--muted-foreground)}
+.sl-t p{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font-size:13.5px}
+.sl-t a{color:inherit;text-decoration:underline;text-underline-offset:3px}
+.sl-foot{margin-top:auto;padding-top:6px;display:flex;gap:8px;flex-wrap:wrap}
+.sl-r{background:var(--muted);display:flex;gap:12px;padding:22px;overflow-x:auto;align-items:stretch;min-width:0}
+.sl-r .frame{height:auto;align-self:stretch;cursor:default}
+.sl-r .frame:only-child{margin:0 auto}
+.noart{margin:auto;color:var(--muted-foreground);font-size:13px}
+.btn.ghost{background:none;color:var(--foreground);border:1px solid var(--border)}
+.btn.ghost:hover{background:var(--muted);opacity:1}
+@media (max-width:820px){.slide{grid-template-columns:1fr;aspect-ratio:auto}.sl-r{height:340px;order:-1}.sl-l{padding:18px}}
+
+/* ---------- mídia enviada, menções, painéis ---------- */
+.frame video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#000}
+.frame.dv{cursor:pointer;text-decoration:none;color:var(--foreground)}
+.frame.dv .play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:46px;height:46px;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;display:grid;place-items:center;font-size:16px;padding-left:3px}
+.frame.dv:hover .play{background:rgba(0,0,0,.85)}
+.sl-r .frame.dv{cursor:pointer}
+.frame .rm{all:unset;cursor:pointer;position:absolute;top:6px;right:6px;width:22px;height:22px;border-radius:50%;background:var(--background);border:1px solid var(--border);display:grid;place-items:center;font-size:13px;color:var(--foreground)}
+.frame .vtag{position:absolute;top:6px;left:6px;background:var(--background);border:1px solid var(--border);border-radius:4px;padding:0 6px;font-size:11px;color:var(--foreground)}
+.up{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--muted-foreground);margin-top:6px}
+.up label{border:1px solid var(--border);border-radius:calc(var(--radius) - 2px);padding:5px 10px;cursor:pointer;color:var(--foreground);font-size:13px}
+.up label:hover{background:var(--muted)}
+.up input{position:absolute;opacity:0;width:1px;height:1px}
+.mchips{display:flex;flex-wrap:wrap;gap:6px}
+.mchip{display:inline-flex;align-items:center;gap:5px;background:var(--muted);border-radius:999px;padding:1px 4px 1px 9px;font-size:12px}
+.mchip button{all:unset;cursor:pointer;width:16px;height:16px;display:grid;place-items:center;border-radius:50%;color:var(--muted-foreground)}
+.at{color:var(--done)}
+.mpick{border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;max-height:190px;overflow-y:auto}
+.mpick button{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:8px;width:100%;padding:6px 10px;cursor:pointer;font-size:13px}
+.mpick button:hover,.mpick button:focus-visible{background:var(--muted)}
+.mpick .none{padding:8px 10px;font-size:12px;color:var(--muted-foreground)}
+.plist{display:flex;flex-direction:column;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.prow{display:flex;align-items:center;gap:10px;padding:9px 12px;border-top:1px solid var(--border);min-width:0}
+.prow:first-child{border-top:0}
+.prow .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.prow select{border:1px solid var(--border);background:var(--background);border-radius:calc(var(--radius) - 2px);padding:4px 8px;font-size:13px}
+button.prow{all:unset;box-sizing:border-box;display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-top:1px solid var(--border);cursor:pointer;width:100%}
+button.prow:first-child{border-top:0}
+button.prow:hover{background:var(--muted)}
+.prow.unread .t{font-weight:500}
+.prow .t{font-size:13px}.prow .s{font-size:12px;color:var(--muted-foreground);overflow-wrap:anywhere}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:40;background:var(--primary);color:var(--primary-foreground);padding:8px 14px;border-radius:var(--radius);font-size:13px;max-width:calc(100% - 32px)}
+</style>
+
+<div id="app"></div>
+<div id="overlay"></div>
+<div id="toast" class="toast" hidden></div>
+
+<script>
+const POSTS = [{"id": "p81", "day": 2, "fmt": "reels", "status": "postado", "animar": false, "frames": 1, "vertical": true, "title": "Foi aqui que pediram água pura de verdade?", "summary": "Foi aqui que pediram água pura de verdade?", "legenda": "Foi aqui que pediram água pura de verdade?\nDeixa com a gente! Purificadores Everest são garantia de qualidade na água que você e sua família bebem todos os dias. \nE com a garrafa Niva, essa água boa vai junto para qualquer lugar.\nConheça tudo pelo link da bio.", "insight": "", "textos": "", "refs": "", "imgs": [], "files": [["02.11 Reels.mp4", "1VQrwBfz9SSvfwoZyVx-3iPTixCyv8Euz"]], "vids": ["1VQrwBfz9SSvfwoZyVx-3iPTixCyv8Euz"]}, {"id": "p82", "day": 2, "fmt": "stories", "status": "postado", "animar": false, "frames": 5, "vertical": true, "title": "Stories de 02/11", "summary": "Stories de 02/11", "legenda": "", "insight": "", "textos": "", "refs": "", "imgs": ["12387_2569", "12388_2573", "12388_2576", "12388_2579", "12388_2582"], "files": [["02.11 - Stories - 1.png", "12_ndwy6ltLhR4PUsEy__6PbADmw3atmv"], ["02.11 - Stories - 2.png", "1z-lf0rzZYsFsgSkvXj0h_8bLl5tzfo4j"], ["02.11 - Stories - 3.png", "1wk-YKCf-Fr9SDQAybPQwx-jAVerVeJzy"], ["02.11 - Stories - 4.png", "1VIHyfQcoUXqLB0HWuwTwEof51rZisYXr"], ["02.11 - Stories - 5.png", "1VXW6jrqaSShoLtO2aWcj3UdHvXsPltzl"]], "vids": []}, {"id": "p80", "day": 3, "fmt": "reels", "status": "postado", "animar": false, "frames": 1, "vertical": true, "title": "A gente tá vendo você levar sua garrafa pra lá e pra cá o dia todo…", "summary": "A gente tá vendo você levar sua garrafa pra lá e pra cá o dia todo…", "legenda": "A gente tá vendo você levar sua garrafa pra lá e pra cá o dia todo sem tomar UM GOLE.\n\nPare de levar a NIVA pra passear e se hidrate, hein!", "insight": "", "textos": "", "refs": "", "imgs": [], "files": [], "vids": ["1kuEdlT6SfBv-tEWFdmD2TnS898WPtMeK"]}, {"id": "p77", "day": 4, "fmt": "carrossel", "status": "postado", "animar": false, "frames": 5, "vertical": false, "title": "Talvez você ainda não esteja preparado para tomar essas decisões,…", "summary": "Talvez você ainda não esteja preparado para tomar essas decisões,…", "legenda": "Talvez você ainda não esteja preparado para tomar essas decisões, mas tudo bem… A gente te ajuda! 😔\n\nCom Everest na sua rotina, fica tudo mais fácil. \nClique no link da bio e conheça!", "insight": "", "textos": "", "refs": "https://www.instagram.com/p/Db8gfl7jouI/", "imgs": [], "files": [["04.11 - CARD - 1.png", "1zPGWABPdryvvnai9Lkkjv-C-8YF_DejX"], ["04.11 - CARD - 2.png", "15gbnkw3unRAIg0NsxUqibiJ8oMClljpd"]], "vids": []}, {"id": "p79", "day": 4, "fmt": "stories", "status": "postado", "animar": false, "frames": 2, "vertical": true, "title": "Clique aqui e saiba mais", "summary": "Clique aqui e saiba mais", "legenda": "", "insight": "", "textos": "Clique aqui e saiba mais", "refs": "", "imgs": ["14075_55", "14075_246"], "files": [["04.11.png", "17ojt30s-C0PpkKor7AFpusTZHh0Bcu-T"], ["04.11-1.png", "1On6E35yiPPdAJIDwxlt4MiLq-8CCWpkB"], ["04.11.mp4", "11lKETecSxp9jFNfPEpJcbyw5O3_QhiUP"]], "vids": []}, {"id": "p75", "day": 5, "fmt": "card", "status": "postado", "animar": false, "frames": 2, "vertical": false, "title": "Não importa seu ponto de partida… Se o assunto é água boa, tudo te…", "summary": "Não importa seu ponto de partida… Se o assunto é água boa, tudo te…", "legenda": "Não importa seu ponto de partida… Se o assunto é água boa, tudo te leva para a Everest.\n\nJá escolheu o seu?", "insight": "", "textos": "", "refs": "", "imgs": [], "files": [["28.10.png", "1vxfnS755HpkDu5iyD5HVjIlyZlzGyGD2"]], "vids": []}, {"id": "p76", "day": 5, "fmt": "stories", "status": "postado", "animar": false, "frames": 4, "vertical": true, "title": "Stories de 05/11", "summary": "Stories de 05/11", "legenda": "", "insight": "", "textos": "", "refs": "https://www.instagram.com/p/Dd9PPANAuCD/?img_index=4", "imgs": ["14044_83", "14044_89", "14058_93", "14058_99"], "files": [["05.11 - Stories - 1.png", "1C3BzBnyXF_uSvxlldwPsXmU3jYFJEwM_"], ["05.11 - Stories - 2.png", "1N5LX8x0BdZD0p2d5hMuEMeo3-z3ytrsy"], ["05.11 - Stories - 3.png", "1id5ZvF1ONGJd6r2YG_Ws7VXQHsmLgfF4"], ["05.11 - Stories - 4.png", "1vOJ_-lCNfStcCVOKZ8cz7IuzGxyjUI4Z"]], "vids": []}, {"id": "p73", "day": 6, "fmt": "reels", "status": "aprovado", "animar": false, "frames": 1, "vertical": true, "title": "Um take estilo Chefs Table com os ingredientes para um prato feito…", "summary": "Um take estilo Chefs Table com os ingredientes para um prato feito…", "legenda": "A mudança foi pequena…mas a diferença, enorme!\nO Dalton te conta como o projeto Água da Casa transformou a rotina do restaurante dele, o Miró.", "insight": "Um take estilo Chefs Table com os ingredientes para um prato feito no restaurante junto de agua da everest.  A camera faz uma rotacao e transicao de flip da mesa e muda para o prato ja pronto com copo de agua da everest.\n\n\nROTEIRO MIRÓ: https://drive.google.com/drive/folders/1HZO5KR4600mXKDoPrGrRpIoYvesRYBAn?usp=drive_link\n\nRef:\nhttps://www.youtube.com/watch?v=6bZsgSfEMYY\nhttps://vimeo.com/526133272?share=copy&fl=cl&fe=ci", "textos": "Miró", "refs": "", "imgs": [], "files": [], "vids": ["1qU2jS5tcs2UNCyYUYuEfcasyY-Fvih8V"]}, {"id": "p74", "day": 6, "fmt": "stories", "status": "aprovado", "animar": false, "frames": 2, "vertical": true, "title": "1 story p/ máquina de gelo e 1 story purificador linha n", "summary": "1 story p/ máquina de gelo e 1 story purificador linha n", "legenda": "", "insight": "Roteiro para 2 stories para Miró\n1 story p/ máquina de gelo e 1 story purificador linha n\n\nRoteiro aqui", "textos": "DA’s podem pegar", "refs": "", "imgs": [], "files": [], "vids": ["1TJI1rH2mcQNFBTWAeFXufRUAdllTrCK0", "1bVWyayMDFuoEcz5DKZbt7JTHLKNj5P2k"]}, {"id": "p69", "day": 7, "fmt": "carrossel", "status": "postado", "animar": false, "frames": 6, "vertical": false, "title": "Pra onde vai a casca de banana do café ou lanche da manhã?", "summary": "Pra onde vai a casca de banana do café ou lanche da manhã?", "legenda": "Pra onde vai a casca de banana do café ou lanche da manhã? \nNa Everest, os resíduos orgânicos da fábrica não terminam no lixo: eles seguem para a compostagem e voltam para a terra como adubo orgânico.\nSó em novembro foram 2.326,5 kg de resíduos transformados em 465,3kg de adubo, evitando a emissão de 3,46 toneladas de CO₂.", "insight": "", "textos": "", "refs": "", "imgs": ["14081_501", "14081_522", "14081_549", "14163_2", "14163_39", "14497_10"], "files": [["18.11.png", "1MoW9iz2-rWRQCNJHzmdWJ6eHU7xsaFdu"], ["18.11-1.png", "1h8VK8N3-rVjOFaWK3i_hqUruzR0JcYRt"], ["18.11-2.png", "1l0Ot8n8yYhMlqK2JKrSLTYcp7pTpUzJ1"], ["12.10.png", "14YvXDbXeTFQTAw8zMaBkjZYxVmpMJS08"], ["12.10-1.png", "15vXe97Q5fLL4ACFNi0ZP_nkT6srxhb0R"], ["12.10-2.png", "1EGyPVLk4Hoe61RLyp9VotRNUo8B6Hsea"]], "vids": []}, {"id": "p72", "day": 7, "fmt": "stories", "status": "postado", "animar": false, "frames": 1, "vertical": true, "title": "Stories de 07/11", "summary": "Stories de 07/11", "legenda": "", "insight": "", "textos": "", "refs": "", "imgs": [], "files": [["18.11.mp4", "1-GKkvS7_KiBSIjNW1CKBNKO4DvceRhec"]], "vids": ["1-GKkvS7_KiBSIjNW1CKBNKO4DvceRhec"]}, {"id": "p66", "day": 9, "fmt": "stories", "status": "aprovado", "animar": false, "frames": 2, "vertical": true, "title": "Escolha o seu preferido", "summary": "Escolha o seu preferido", "legenda": "", "insight": "", "textos": "Escolha o seu preferido", "refs": "", "imgs": ["14077_290", "14078_384"], "files": [["9.11.png", "1QUESO3V2Tob94DjpaQWwjMPNdqeFuPEd"], ["9.11-1.png", "1-NJLrhHn-KXKQNOiqFazVSBq4ZjbjyqA"]], "vids": []}, {"id": "p67", "day": 9, "fmt": "stories", "status": "aprovado", "animar": false, "frames": 5, "vertical": true, "title": "Stories de 09/11", "summary": "Stories de 09/11", "legenda": "", "insight": "", "textos": "", "refs": "", "imgs": ["14540_7", "14540_9", "14540_15", "14540_17", "14540_19"], "files": [["9.11 - STORIES.mp4", "1XAIRaL2UTy_RdY3ZL69MjJNXC3GATBZw"]], "vids": ["1XAIRaL2UTy_RdY3ZL69MjJNXC3GATBZw"]}, {"id": "p68", "day": 9, "fmt": "reels", "status": "postado", "animar": false, "frames": 1, "vertical": true, "title": "Mais economia, tecnologia e sustentabilidade para dentro da sua…", "summary": "Mais economia, tecnologia e sustentabilidade para dentro da sua…", "legenda": "Mais economia, tecnologia e sustentabilidade para dentro da sua empresa.\nVem conhecer melhor o  Plus Inverter + no link da bio.", "insight": "", "textos": "", "refs": "", "imgs": ["14044_42"], "files": [["13.11 Reels.mp4", "1OzulIiIciORv6cdxsdJudyY3QjXTrpfU"]], "vids": ["1OzulIiIciORv6cdxsdJudyY3QjXTrpfU"]}, {"id": "p62", "day": 10, "fmt": "stories", "status": "em_aprovacao", "animar": false, "frames": 3, "vertical": true, "title": "Stories de 10/11", "summary": "Stories de 10/11", "legenda": "", "insight": "", "textos": "", "refs": "", "imgs": [], "files": [], "vids": ["1Afu70ohpbXYpcgE919VqQakgPmvpLdI7"]}, {"id": "p64", "day": 10, "fmt": "reels", "status": "aprovado", "animar": false, "frames": 1, "vertical": true, "title": "Ela saiu cheia na sexta de manhã. Como sempre.", "summary": "Ela saiu cheia na sexta de manhã. Como sempre.", "legenda": "Ela saiu cheia na sexta de manhã. Como sempre.\nNinguém sabe pra onde ela foi. Se você tem alguma ideia, comente aqui.", "insight": "", "textos": "", "refs": "", "imgs": [], "files": [["FEED_TEASER_v1.png", "1AM1o_65tVd-GZ9i2a_CLOq-FIkDo2mMP"]], "vids": []}, {"id": "p65", "day": 10, "fmt": "stories", "status": "postado", "animar": false, "frames": 3, "vertical": true, "title": "Stories de 10/11", "summary": "Stories de 10/11", "legenda": "", "insight": "", "textos": "", "refs": "", "imgs": [], "files": [["TEASER_1 10.11.png", "1gDWvLpNAYNaNUETYi8Y1J00FWDCSEO2U"], ["TEASER_2 10.11.png", "1kMekpyHs9gk44xt7KihWdF9_V48lL8y8"], ["TEASER_3 10.11.png", "1zuQ_AkbiCrt3Kx3ZJTPxXasJ1j4JMXxC"]], "vids": []}, {"id": "p43", "day": 11, "fmt": "reels", "status": "insumos", "animar": false, "frames": 0, "vertical": true, "title": "Fazer um video com o Dalton ele fazendo uma festa, um encontro em…", "summary": "Fazer um video com o Dalton ele fazendo uma festa, um encontro em…", "legenda": "Regra de ouro ao receber amigos em casa: ninguém fica aqui com sede e ninguém vai embora com fome. \n\nE hoje a jarra foi de água saborizada: abacaxi com hortelã e melancia com manjericão, tudo feito com a água gelada do meu purificador Everest \nEscreve aqui: qual sabor você mais gosta?", "insight": "Fazer um video com o Dalton ele fazendo uma festa, um encontro em casa mostrando as comidas e a agua saborizada utilizada com a Everest \n\nRoteiro: https://drive.google.com/drive/folders/1goGTgpP7TqdAH3wjvWYGBC3fs0CibdmB?usp=drive_link\n\nREF\n\nhttps://www.instagram.com/p/DcG5fT3RQPh/", "textos": "DALTON", "refs": "", "imgs": [], "files": [], "vids": []}, {"id": "p44", "day": 11, "fmt": "stories", "status": "insumos", "animar": false, "frames": 0, "vertical": true, "title": "1 story p/ o Foz e 1 story p/ purificador linha n", "summary": "1 story p/ o Foz e 1 story p/ purificador linha n", "legenda": "", "insight": "Roteiro para 2 stories para Dalton\n1 story p/ o Foz e 1 story p/ purificador linha n\n\nROTEIROS AQUI", "textos": "", "refs": "", "imgs": [], "files": [], "vids": []}, {"id": "p63", "day": 11, "fmt": "stories", "status": "aprovado", "animar": false, "frames": 2, "vertical": true, "title": "Stories de 11/11", "summary": "Stories de 11/11", "legenda": "", "insight": "", "textos": "", "refs": "", "imgs": ["12400_247", "12400_255"], "files": [["11.11 - Stories - 1.png", "1HHdhPDE_m1vunEhTdAJlh7i4l8rJJ1Jn"], ["11.11 - Stories - 2.png", "1Mvaivt8ZjetXVHXc4c6rJj2Yj2RALqM5"], ["TEASER_v1 10.11.png", "1Ja5G7O5l9RvMZvJUcYfLlrGZcOGHz4IM"], ["TEASER_4 10.11.png", "1Ip7vt8Bmqox6d5LeOQJL2sWOXbPSgu7_"], ["TEASER_STEP 4 .mp4", "1O2bj32aAhsU3VAF0xxC_-DbNHdJ3IgMe"]], "vids": []}, {"id": "p46", "day": 12, "fmt": "carrossel", "status": "none", "animar": false, "frames": 13, "vertical": false, "title": "SOS Pantanal -  Dia do Pantanal", "summary": "SOS Pantanal -  Dia do Pantanal", "legenda": "12 de novembro, Dia do Pantanal.\nLá, quem dita o ritmo é a água: ela transforma estradas em pontes, campos em mar e rios em espelhos. Para celebrar esse território único, separamos lugares onde dá para sentir esse compasso de perto.", "insight": "SOS Pantanal -  Dia do Pantanal\nAqui vamos mostrar alguns lugares interessanters no Pantanal\n\nCard 1 (capa)\n Foto: aérea de campos alagados ao amanhecer.\n\nLUGARES ONDE A ÁGUA DÁ O RITMO\n\nCard 2\n Foto: canais com tuiuiús, garças e onças.\nENCONTRO DAS ÁGUAS \nFoto: aérea da estrada de terra cortando áreas alagadas.\nTRANSPANTANEIRA \nFoto: estrada entre lagoas espelhadas.\nESTRADA PARQUE PANTANAL \nFoto: rio serpenteando na mata com um barco no rio.\nRIO MIRANDA\n\nCard 3\n Foto: morros erguendo-se do rio.\nSERRA DO AMOLAR\n Foto: lagoas verdes e azuis lado a lado, vistas de cima.\nSALINAS DA NHECOLÂNDIA\nFoto: vitórias-régias ao pôr do sol.\nPARQUE NACIONAL DO PANTANAL MATOGROSSENSE\n\nCard 4 \n Foto: aérea do Pantanal ao pôr do sol.\nQUANDO A ÁGUA SEGUE SEU RITMO, A VIDA SEGUE JUNTO\n Cuidar das águas do Pantanal é cuidar de tudo o que vive nele.\n Viva o Pantanal", "textos": "", "refs": "", "imgs": ["14703_1578", "14703_1584", "14703_1593", "14703_1596", "14703_1599", "14703_1602", "14703_1605", "14703_1608", "14703_1611", "14703_1614", "14703_1617", "14703_1620", "14703_1623"], "files": [], "vids": []}, {"id": "p55", "day": 12, "fmt": "stories", "status": "aprovado", "animar": false, "frames": 3, "vertical": true, "title": "Stories de 12/11", "summary": "Stories de 12/11", "legenda": "", "insight": "", "textos": "", "refs": "", "imgs": [], "files": [], "vids": ["1smw3ezvdn8a6tyLtZmeQF0kztWQYhvUs"]}, {"id": "p56", "day": 12, "fmt": "reels", "status": "aprovado", "animar": false, "frames": 1, "vertical": true, "title": "Cheguei pessoal, com um babado fortíssimo!", "summary": "Cheguei pessoal, com um babado fortíssimo!", "legenda": "Cheguei pessoal, com um babado fortíssimo!\n\nO.b.s.: não esquece de depois ir lá conferir o meu trabalho com o @veigh, ein!", "insight": "", "textos": "", "refs": "", "imgs": [], "files": [], "vids": ["1N9xKYv-T_3NdhpHd_ZnZWsPZTuCFzwdS"]}, {"id": "p57", "day": 12, "fmt": "reels", "status": "aprovado", "animar": false, "frames": 3, "vertical": true, "title": "Reels de 12/11", "summary": "Reels de 12/11", "legenda": "", "insight": "", "textos": "", "refs": "", "imgs": [], "files": [["TELA 1 .mp4", "142c36kE29UTa83Q0UoZyJvHLcwgD4-Fr"], ["TELA_2.mp4", "1iI9Z90obJ7dlAEP48AmYQ3O1g2flapjR"], ["TELA_3.mp4", "10YGvSJChqx5n8HvnZnRhwEvF4wGUx4I_"], ["TELA_4.mp4", "1dtCXoKejw5r9f1sfydwVnyjdBMrTxDld"], ["TELA_5.mp4", "11XDPL9oh2MJM5K1qYN8EvPcSKcD-I3Sc"], ["TELA_6.mp4", "1cxMjG2r3ZCAqt9kELgB-r1lXW00DEtZQ"], ["TELA_7.mp4", "1_CceNOG04h_YVwigLPrdXXEmkkSxrNcS"]], "vids": ["1N9xKYv-T_3NdhpHd_ZnZWsPZTuCFzwdS", "1oB2iRVNgCGeAWmpJvi8foORZHPr9L9ru", "1mYDP9KjvsSTq74IIcSC7NsDBApQ4jkPY"]}, {"id": "p58", "day": 12, "fmt": "reels", "status": "aprovado", "animar": false, "frames": 2, "vertical": true, "title": "Reels de 12/11", "summary": "Reels de 12/11", "legenda": "", "insight": "", "textos": "", "refs": "", "imgs": [], "files": [], "vids": ["11zpHc2qyfjOiAPQxbAoa2ibNru10_lKA", "1lQwGr1jbUm1Xh12O5t9WK4Dt-W6MtY-m"]}, {"id": "p59", "day": 12, "fmt": "reels", "status": "aprovado", "animar": false, "frames": 2, "vertical": true, "title": "Reels de 12/11", "summary": "Reels de 12/11", "legenda": "", "insight": "", "textos": "", "refs": "", "imgs": [], "files": [], "vids": ["1rqYiBUo4ERRCPA1xhS3JaHzm9bglf2Wv", "1jBPrwLFZJ0KK_yMKPaRM5cAKwN4HmLPz"]}, {"id": "p60", "day": 12, "fmt": "stories", "status": "aprovado", "animar": false, "frames": 2, "vertical": true, "title": "Stories de 12/11", "summary": "Stories de 12/11", "legenda": "", "insight": "", "textos": "", "refs": "", "imgs": [], "files": [["STORIES - 12.11_repost.png", "1_XZB50g3spdi9N8E1NKlWB9AMFPdhKlB"]], "vids": []}, {"id": "p61", "day": 12, "fmt": "reels", "status": "em_aprovacao", "animar": false, "frames": 1, "vertical": true, "title": "Quando foi a última vez que você parou para escutar a água?", "summary": "Quando foi a última vez que você parou para escutar a água?", "legenda": "Quando foi a última vez que você parou para escutar a água?\nNo Pantanal, ela dita o ritmo da vida. E quem vive às suas margens aprende a reconhecer seus sinais e a importância de cuidar dela.\nNeste Dia do Pantanal, a gente lembra que cuidar da água é cuidar de tudo.\nPor meio do Águas que Falam, projeto do @sospantanal em parceria com a Chalana Esperança e apoio da Everest, o cuidado com os recursos hídricos ganha força por meio do monitoramento da qualidade da água e de iniciativas que contribuem para ampliar o acesso à água potável nas comunidades.\nPorque preservar a água é também cuidar de quem depende dela todos os dias.\nSaiba mais sobre o projeto no link da bio.", "insight": "", "textos": "", "refs": "", "imgs": [], "files": [["post everest pantanal.mp4", "1Jt7e1PhKjkKhvBvrmjQfj7ahOaDiYzA5"], ["post everest pantanal.2.mp4", "14X-GcU2B93s5819ipZH4buwlK_UfhCGG"]], "vids": ["1MFz365Tc8WV29giaZDogJUMT7Ljd3imL"]}, {"id": "p4", "day": 13, "fmt": "reels", "status": "postado", "animar": false, "frames": 1, "vertical": true, "title": "No meio da gravação do clipe do @veigh, teve uma pausa que ninguém…", "summary": "No meio da gravação do clipe do @veigh, teve uma pausa que ninguém…", "legenda": "No meio da gravação do clipe do @veigh, teve uma pausa que ninguém pulou.", "insight": "", "textos": "", "refs": "", "imgs": [], "files": [["reels_bastidores_hidratacao (2).mp4", "138XdU7z6RqSpwLLHBxhhI_6t35p-WB5m"]], "vids": ["1xWIdhSIxl37Tj0xvoCynt6HgKLD1_5CT"]}, {"id": "p5", "day": 13, "fmt": "stories", "status": "postado", "animar": false, "frames": 3, "vertical": true, "title": "Aproveite e garanta a sua", "summary": "Aproveite e garanta a sua", "legenda": "", "insight": "", "textos": "Aproveite e garanta a sua", "refs": "", "imgs": [], "files": [["STORIES_1 13.11.png", "1jTalZD4eFz661jtH4EqGhJNny5vTnvsW"], ["STORIES_1 13.11-1.png", "1ymFqRAVHt6URehvXM1EHkDYWRX2Nj4hP"]], "vids": []}, {"id": "p6", "day": 13, "fmt": "stories", "status": "aprovado", "animar": false, "frames": 6, "vertical": true, "title": "Team Veigh e Niva", "summary": "Team Veigh e Niva", "legenda": "", "insight": "", "textos": "Team Veigh e Niva\nprefiro enxaqueca", "refs": "", "imgs": [], "files": [], "vids": []}, {"id": "p7", "day": 14, "fmt": "reels", "status": "postado", "animar": false, "frames": 1, "vertical": true, "title": "Se você tem um purificador Everest, já sabe exatamente da…", "summary": "Se você tem um purificador Everest, já sabe exatamente da…", "legenda": "Se você tem um purificador Everest, já sabe exatamente da durabilidade que estamos falando.\n\nO FOZ tem isso e muito mais. Conheça no site ou na revenda autorizada mais próxima de você.", "insight": "", "textos": "", "refs": "", "imgs": [], "files": [], "vids": ["1rQoKEqD3V_ATLc0meEc_wQakMqJL_Rg-"]}, {"id": "p8", "day": 14, "fmt": "stories", "status": "aprovado", "animar": false, "frames": 4, "vertical": true, "title": "Encontre o seu aqui", "summary": "Encontre o seu aqui", "legenda": "", "insight": "", "textos": "Encontre o seu aqui", "refs": "", "imgs": [], "files": [], "vids": ["12XfmXDBfYMYa12Y4gAAnkXFXp9BIjAVX", "1pz8Q0Hl7w35QXy7PZkwRDvULphqG7ijV", "1IXQ0K83yPFXbIhai4-1AcHQ5adv8xaZ5"]}, {"id": "p9", "day": 16, "fmt": "reels", "status": "insumos", "animar": false, "frames": 0, "vertical": true, "title": "Sesc Flamengo", "summary": "Sesc Flamengo", "legenda": "Bate-bola com as meninas do Sesc Flamengo.\n\nRitual antes do jogo, música no treino, amuleto da sorte… e o que não pode faltar de jeito nenhum: a Niva, para manter a água gelada do primeiro ao último ponto.", "insight": "Sesc Flamengo\n\nRoteiro: https://drive.google.com/drive/folders/1W1fB1n74y-QMqn-WQxYjo7FtUm8OJZy2?usp=drive_link\n\n\nRef: https://www.instagram.com/reels/DagymatRgI1/", "textos": "SESC FLAMENGO", "refs": "", "imgs": [], "files": [], "vids": []}, {"id": "p10", "day": 16, "fmt": "stories", "status": "aprovado", "animar": false, "frames": 3, "vertical": true, "title": "Eu fui, eu tava", "summary": "Eu fui, eu tava", "legenda": "", "insight": "", "textos": "Eu fui, eu tava\nQuando tem mais, ein?\nNão sei de nada…\nClica e garante a sua", "refs": "", "imgs": ["14094_177", "14094_181", "14094_186"], "files": [["STORIES - 16.11.png", "1QRcRA0HsJqGkMnmFzcGrLAkBEm0dCCOU"], ["STORIES - 16.11-1.png", "1obwXPsVwX3OVHFvDtUM5HzNlzzNviSI3"]], "vids": []}, {"id": "p11", "day": 17, "fmt": "reels", "status": "insumos", "animar": false, "frames": 0, "vertical": true, "title": "Rafa K  falando sobre passeio que gosta de fazer pra relaxar..…", "summary": "Rafa K  falando sobre passeio que gosta de fazer pra relaxar..…", "legenda": "Dando nota pro meu rolê no parque\nTeve nota pra tudo…mas a minha Niva, com água gelada, gabaritou e tirou 10.", "insight": "Rafa K  falando sobre passeio que gosta de fazer pra relaxar.. Leva sempre a garrafa NIVA\n\n\nRoteiro: https://drive.google.com/drive/folders/1WbHFRwbyUmzkt09vgSl-E08YheFX40Dd?usp=drive_link", "textos": "", "refs": "", "imgs": [], "files": [], "vids": []}, {"id": "p12", "day": 17, "fmt": "stories", "status": "insumos", "animar": false, "frames": 0, "vertical": true, "title": "1 falando sobre purificadores e 1 sobre Niva", "summary": "1 falando sobre purificadores e 1 sobre Niva", "legenda": "", "insight": "Roteiro para 2 stories para Rafa K.\n1 falando sobre purificadores e 1 sobre Niva\n\nRoteiro aqui", "textos": "", "refs": "", "imgs": [], "files": [], "vids": []}, {"id": "p13", "day": 17, "fmt": "stories", "status": "em_aprovacao", "animar": false, "frames": 1, "vertical": true, "title": "Stories de 17/11", "summary": "Stories de 17/11", "legenda": "", "insight": "", "textos": "", "refs": "", "imgs": [], "files": [["16.11 - Stories.mp4", "1zb5FCdJQoMkmDZh9wJ9stKp3QvEyw08q"]], "vids": ["1zb5FCdJQoMkmDZh9wJ9stKp3QvEyw08q"]}, {"id": "p14", "day": 18, "fmt": "carrossel", "status": "aprovado", "animar": false, "frames": 7, "vertical": false, "title": "O instrutor avaliou… Já salva a ficha de treino da Niva e não pula…", "summary": "O instrutor avaliou… Já salva a ficha de treino da Niva e não pula…", "legenda": "O instrutor avaliou… Já salva a ficha de treino da Niva e não pula a série que mais importa: se hidratar. A garrafa do clipe agora pode ir pra sua rotina. Link na bio.", "insight": "", "textos": "", "refs": "", "imgs": [], "files": [["Slice 1.png", "1WWd7pM7tOdtf1B7X5VcLpBeVznE2LtDz"], ["Slice 2.png", "12e63WViyW77p9par_XXXOD7KWw0RBl9z"], ["Slice 3.png", "1TynIQBPzuRZ_MHkoqGcaWy3zx-hGLPB0"], ["Slice 4.png", "1aHS7vv5lfkaAy_zR_BUoqE02Axes2HxC"], ["Slice 5.png", "1ZmKmNImU7yfKTjFV1drVvHktXu_61peB"], ["Slice 6.png", "12rUv-Yv2gHU8RLw8SLUuvoPgF6Kb_o_3"]], "vids": []}, {"id": "p17", "day": 18, "fmt": "stories", "status": "aprovado", "animar": false, "frames": 7, "vertical": true, "title": "😗", "summary": "😗", "legenda": "", "insight": "", "textos": "😗\nClica aqui que eu te ajudo", "refs": "", "imgs": ["12408_290", "12408_298", "14065_105", "14065_127", "14065_131", "14065_135", "14065_142"], "files": [["STORIES_1 - 18.11.png", "15CS4LB93kWMOjFsftrbsQ-uw0Jm5MuAl"], ["STORIES_2 - 18.11.png", "1RBBy_uYdNlGaSD8_GQpb0Gahk3DlOFPD"], ["STORIES_3 - 18.11.png", "1F1BzTQMCc-BF3cNkUnCUWh7WEPaJN-QW"]], "vids": []}, {"id": "p18", "day": 19, "fmt": "reels", "status": "insumos", "animar": false, "frames": 0, "vertical": true, "title": "Restaurante Ribalta Antes e Depois de Everest", "summary": "Restaurante Ribalta Antes e Depois de Everest", "legenda": "Antes: garrafinhas e galões ocupando muito espaço no estoque.\nDepois: água purificada Everest, servida gelada em garrafa de vidro, direto na mesa.\nA Ribalta foi a primeira pizzaria carioca a aderir ao Água da Casa, o projeto da Everest para levar mais sustentabilidade e hospitalidade aos restaurantes e hotéis do Brasil.", "insight": "Restaurante Ribalta Antes e Depois de Everest\n\nRoteiro edicao: https://docs.google.com/document/d/1QzKXehx3W9LWC82_Q1iN9uVuCU_CrYks61wexNdsZ10/edit?usp=drive_link\n\nRef: https://vimeo.com/374014012\n\nDirecional de foto e gravação para filmaker no Ribalta: \nhttps://docs.google.com/document/d/1_KflMbE4VcGIPI0SRFqjNUqC4Rkm9qbxu6JxF08YSS0/edit?usp=drive_link", "textos": "Reels Ribalta: \n\"Antes e depois do projeto Água da Casa\"", "refs": "", "imgs": [], "files": [], "vids": []}, {"id": "p19", "day": 19, "fmt": "stories", "status": "aprovado", "animar": false, "frames": 6, "vertical": true, "title": "Eu, a + nostálgica", "summary": "Eu, a + nostálgica", "legenda": "", "insight": "", "textos": "Eu, a + nostálgica\nAqui é zero nostalgia\nMais alguém na vibe do #TBT por aí?\nClica aqui que eu te ajudo", "refs": "", "imgs": [], "files": [["STORIES - 19.11.png", "1cCZlu82GBJIr_pRv9qGaCuNlndwF5ZZ0"], ["STORIES - 19.11-1.png", "1aUYd7hTVSJ1J6TGt2QisPkL2gfE3DkAY"], ["STORIES - 19.11-2.png", "1WI-24Q-Z2dVFtz5wB2_WfR82Jl7jngs6"]], "vids": []}, {"id": "p20", "day": 20, "fmt": "reels", "status": "none", "animar": false, "frames": 6, "vertical": true, "title": "Máquina de Gelo", "summary": "Máquina de Gelo", "legenda": "É, dinheiro não compra felicidade mesmo. Mas compra praticidade e economia para sua casa ou sua empresa.\n\nConheça nossas máquinas de gelo pelo link da bio.", "insight": "Máquina de Gelo\nRef: https://www.instagram.com/p/DeFmIwskcGL/?img_index=2", "textos": "", "refs": "", "imgs": ["14553_57", "14553_60", "14553_63", "14553_67", "14553_71", "14553_169"], "files": [["magnific … 99922.mp4", "15-dxC1MAyAf7cllnhpwo4XH9uht6syuU"], ["magnific … 99923.mp4", "1AMx7JOIMteohJHjWb0htp_vzr-rcltt1"], ["magnific … 99924.mp4", "1TRG1xWMRqDxU4aiE5ZAsCz91MaOgPrn3"], ["magnific … 99925.mp4", "1Mz95_NrRNS_QjwNMr1xnsXINW0RB3Obe"], ["magnific … 99926.mp4", "1NApj1vPJXNNANPx466RBcmTNmck1ajG9"]], "vids": []}, {"id": "p21", "day": 20, "fmt": "stories", "status": "none", "animar": false, "frames": 11, "vertical": true, "title": "Saiba mais", "summary": "Saiba mais", "legenda": "", "insight": "", "textos": "Saiba mais", "refs": "", "imgs": ["14105_2", "14120_296", "14120_254", "14120_327", "14120_474", "14120_499", "14120_523", "14120_571", "14120_595", "14120_619", "14120_359"], "files": [["20.11 - STORIES - 1.mp4", "1gEuq3ip4WUzvTKIOxx1r47i4dW6f-D3u"], ["20.11 - STORIES - 2.mp4", "1hLd8KQK9YIbhFCaxCG6pi087mbhWPRRX"], ["20.11 - STORIES - 3.mp4", "18qxa5yyl69uBfURNDSn1yiETQ_vUaHO7"]], "vids": ["1gEuq3ip4WUzvTKIOxx1r47i4dW6f-D3u", "1hLd8KQK9YIbhFCaxCG6pi087mbhWPRRX", "18qxa5yyl69uBfURNDSn1yiETQ_vUaHO7"]}, {"id": "p22", "day": 21, "fmt": "reels", "status": "none", "animar": true, "frames": 3, "vertical": true, "title": "Por fora, o seu purificador. Por dentro, quem faz o trabalho…", "summary": "Por fora, o seu purificador. Por dentro, quem faz o trabalho…", "legenda": "Por fora, o seu purificador. Por dentro, quem faz o trabalho pesado: o Refil Original Everest.\n\nTá na hora de trocar? \nEncontre a Revendedora Autorizada mais perto de você pelo link da bio.", "insight": "", "textos": "", "refs": "", "imgs": ["14159_12", "14217_2", "14226_238"], "files": [], "vids": []}, {"id": "p23", "day": 21, "fmt": "stories", "status": "em_aprovacao", "animar": false, "frames": 3, "vertical": true, "title": "Clique e garanta o seu Everest", "summary": "Clique e garanta o seu Everest", "legenda": "", "insight": "", "textos": "Clique e garanta o seu Everest", "refs": "https://www.instagram.com/p/DdjJdnURcSp/", "imgs": [], "files": [], "vids": []}, {"id": "p24", "day": 22, "fmt": "carrossel", "status": "none", "animar": false, "frames": 4, "vertical": false, "title": "Ele é pequeno. Uma semente também é. E olha o que ela é capaz de…", "summary": "Ele é pequeno. Uma semente também é. E olha o que ela é capaz de…", "legenda": "Ele é pequeno. Uma semente também é. E olha o que ela é capaz de fazer.\nO Everest Baby cabe onde você precisa e purifica a água instantaneamente, a hora que você quiser.\nGrandes impactos vêm também de pacotes pequenos.", "insight": "", "textos": "", "refs": "", "imgs": ["14645_578", "14645_595", "14645_600", "14645_605"], "files": [["22.11.png", "17AoW-HaDo2U24tSZokjrEoHdXM0Y0HCE"], ["22.11-1.png", "1vT0sy3d82e-6YC0NY-QUXyB3Y2E9oMlp"], ["22.11-3.png", "1nMzZn44LZ9bIlVe-9B7lYasaHKX7DOK3"]], "vids": []}, {"id": "p26", "day": 23, "fmt": "reels", "status": "insumos", "animar": false, "frames": 0, "vertical": true, "title": "Pré-black", "summary": "Pré-black", "legenda": "", "insight": "Pré-black", "textos": "Pré - Black", "refs": "", "imgs": [], "files": [], "vids": []}, {"id": "p27", "day": 23, "fmt": "stories", "status": "none", "animar": false, "frames": 2, "vertical": true, "title": "Stories de 23/11", "summary": "Stories de 23/11", "legenda": "", "insight": "", "textos": "", "refs": "", "imgs": [], "files": [], "vids": []}, {"id": "p28", "day": 24, "fmt": "tbd", "status": "insumos", "animar": false, "frames": 0, "vertical": false, "title": "Pré-black Rafa K.", "summary": "Pré-black Rafa K.", "legenda": "", "insight": "Pré-black Rafa K.", "textos": "Pré - Black Rafa K.", "refs": "", "imgs": [], "files": [], "vids": []}, {"id": "p29", "day": 24, "fmt": "stories", "status": "none", "animar": false, "frames": 0, "vertical": true, "title": "Sequência Rafa K.", "summary": "Sequência Rafa K.", "legenda": "", "insight": "", "textos": "Sequência Rafa K.", "refs": "", "imgs": [], "files": [], "vids": []}, {"id": "p30", "day": 24, "fmt": "stories", "status": "none", "animar": false, "frames": 3, "vertical": true, "title": "AGARRE O ÚNICO DESCONTO DO ANO", "summary": "AGARRE O ÚNICO DESCONTO DO ANO", "legenda": "", "insight": "", "textos": "AGARRE O ÚNICO DESCONTO DO ANO", "refs": "", "imgs": [], "files": [], "vids": []}, {"id": "p31", "day": 25, "fmt": "tbd", "status": "insumos", "animar": false, "frames": 0, "vertical": false, "title": "Pré-black", "summary": "Pré-black", "legenda": "", "insight": "Pré-black", "textos": "Pré - Black", "refs": "", "imgs": [], "files": [], "vids": []}, {"id": "p32", "day": 25, "fmt": "stories", "status": "none", "animar": false, "frames": 0, "vertical": true, "title": "Stories de 25/11", "summary": "Stories de 25/11", "legenda": "", "insight": "", "textos": "", "refs": "", "imgs": [], "files": [], "vids": []}, {"id": "p33", "day": 26, "fmt": "tbd", "status": "aprovado", "animar": false, "frames": 1, "vertical": false, "title": "Pré-black Dalton", "summary": "Pré-black Dalton", "legenda": "", "insight": "Pré-black Dalton", "textos": "Pré - Black - DALTON", "refs": "", "imgs": [], "files": [], "vids": ["1FDRYcOtioDLrhkxSRshuSvxB40HrtsRc"]}, {"id": "p34", "day": 26, "fmt": "stories", "status": "none", "animar": false, "frames": 0, "vertical": true, "title": "Sequência Dalton (Nathi)", "summary": "Sequência Dalton (Nathi)", "legenda": "", "insight": "", "textos": "Sequência Dalton (Nathi)", "refs": "", "imgs": [], "files": [], "vids": []}, {"id": "p35", "day": 27, "fmt": "reels", "status": "insumos", "animar": false, "frames": 0, "vertical": true, "title": "black", "summary": "black", "legenda": "", "insight": "black", "textos": "Black", "refs": "", "imgs": [], "files": [], "vids": []}, {"id": "p36", "day": 27, "fmt": "stories", "status": "none", "animar": false, "frames": 2, "vertical": true, "title": "Stories de 27/11", "summary": "Stories de 27/11", "legenda": "", "insight": "", "textos": "", "refs": "", "imgs": [], "files": [], "vids": []}, {"id": "p37", "day": 28, "fmt": "tbd", "status": "insumos", "animar": false, "frames": 5, "vertical": false, "title": "Post de 28/11", "summary": "Post de 28/11", "legenda": "", "insight": "", "textos": "", "refs": "", "imgs": [], "files": [], "vids": []}, {"id": "p39", "day": 28, "fmt": "stories", "status": "none", "animar": false, "frames": 4, "vertical": true, "title": "Stories de 28/11", "summary": "Stories de 28/11", "legenda": "", "insight": "", "textos": "", "refs": "", "imgs": [], "files": [["28.11 - STORIES - 1.png", "1Zw9QZ-plRBXoXov4FNzsgE7KDZpc4PRM"], ["28.11 - STORIES - 2.png", "1Xf3pYW6SMivmtEteO6Ugmyw_wt_dxlmu"], ["28.11 - STORIES - 3.png", "1S4iiaaw-D0LaRoBR75-OLc8cn7WHJA77"], ["28.11 - STORIES - 4.png", "1Ky64f0-zUKZDyz4gSkY5IEZaE4i1ht3D"]], "vids": []}, {"id": "p40", "day": 29, "fmt": "tbd", "status": "insumos", "animar": false, "frames": 0, "vertical": false, "title": "pós-black", "summary": "pós-black", "legenda": "", "insight": "pós-black", "textos": "Pós - Black", "refs": "", "imgs": [], "files": [], "vids": []}, {"id": "p41", "day": 30, "fmt": "reels", "status": "insumos", "animar": false, "frames": 0, "vertical": true, "title": "Cyber Monday", "summary": "Cyber Monday", "legenda": "", "insight": "Cyber Monday", "textos": "Cyber Monday", "refs": "", "imgs": [], "files": [], "vids": []}, {"id": "p42", "day": 30, "fmt": "stories", "status": "none", "animar": false, "frames": 2, "vertical": true, "title": "Stories de 30/11", "summary": "Stories de 30/11", "legenda": "", "insight": "", "textos": "", "refs": "", "imgs": [], "files": [["30.11 - STORIES - 1.png", "1gCrth2Ob7RyO0-YucRB2IOnjCrgNeJaB"], ["30.11 - STORIES - 2.png", "1IkvGtoqwMT_xgZU66yOBPpJnXQZnEX2M"]], "vids": []}, {"id": "p45", "day": null, "fmt": "stories", "status": "none", "animar": false, "frames": 0, "vertical": true, "title": "Texto: Voce tomaria um copo de agua comigo se eu fosse um…", "summary": "Texto: Voce tomaria um copo de agua comigo se eu fosse um…", "legenda": "", "insight": "Texto: Voce tomaria um copo de agua comigo se eu fosse um Tiranossauro caramelo?\n\nImagem do caramelo", "textos": "", "refs": "https://www.instagram.com/p/DdPRwJ8msCE/?img_index=1", "imgs": [], "files": [], "vids": []}, {"id": "p48", "day": null, "fmt": "reels", "status": "none", "animar": false, "frames": 0, "vertical": true, "title": "Usar esse meme e colocar imagem de alguem bebendo um copo dagua…", "summary": "Usar esse meme e colocar imagem de alguem bebendo um copo dagua…", "legenda": "Esperou até o final pra ver isso, né? Agora vai lá beber água", "insight": "Usar esse meme e colocar imagem de alguem bebendo um copo dagua inves do cachorro\n\n\nREF\n\n\nhttps://www.instagram.com/p/DdQw4s8hkxj/", "textos": "", "refs": "", "imgs": [], "files": [], "vids": []}, {"id": "p49", "day": null, "fmt": "reels", "status": "none", "animar": false, "frames": 0, "vertical": true, "title": "Fazer carrossel com alguma dicas de filmes com tema agua - \"Filmes…", "summary": "Fazer carrossel com alguma dicas de filmes com tema agua - \"Filmes…", "legenda": "Filme bom é aquele que faz a gente esquecer do mundo. Mas não esquece do copo d’água, hein? \nSeparamos uma lista com a água como estrela, pra assistir bem acompanhado de pipoca e docinho.", "insight": "Fazer carrossel com alguma dicas de filmes com tema agua - \"Filmes para ver com um copo d'água do lado\"\n\n\nRoteiro: https://drive.google.com/drive/folders/1Nhl38pS-4yAlqdJ_XMV_G-nDWnzHjBgn?usp=drive_link\n\n\nREF\n\nhttps://www.instagram.com/p/DdPsYnmRLNh/", "textos": "", "refs": "", "imgs": [], "files": [], "vids": []}, {"id": "p50", "day": null, "fmt": "reels", "status": "none", "animar": false, "frames": 0, "vertical": true, "title": "Chamar alguns influs que mostram restaurantes para irem mostrar…", "summary": "Chamar alguns influs que mostram restaurantes para irem mostrar…", "legenda": "", "insight": "Chamar alguns influs que mostram restaurantes para irem mostrar algum restaurante no Rio que tem a parceria com agua da Everest\n\n\nREF\n\nhttps://www.instagram.com/p/DcyMx84s2P8/", "textos": "", "refs": "", "imgs": [], "files": [], "vids": []}, {"id": "p51", "day": null, "fmt": "reels", "status": "none", "animar": false, "frames": 0, "vertical": true, "title": "Um video mais comercial bem cinematográfico mostrando suor de um…", "summary": "Um video mais comercial bem cinematográfico mostrando suor de um…", "legenda": "", "insight": "Um video mais comercial bem cinematográfico mostrando suor de um esportista, suor de um musico, de um medico e vai se sucedendo em varias atividades diferentes suando em zoom, ate que da um zoom out e os personagens pegam um copo de água para tomar.\n\n\nREF\n\nhttps://vimeo.com/880044218\n\nhttps://vimeo.com/892347197", "textos": "", "refs": "", "imgs": [], "files": [], "vids": []}, {"id": "p52", "day": null, "fmt": "reels", "status": "none", "animar": false, "frames": 0, "vertical": true, "title": "A garrafa Everest na mesma posição sendo pega por varias pessoas e…", "summary": "A garrafa Everest na mesma posição sendo pega por varias pessoas e…", "legenda": "Niva tá em todo lugar, e vai com você pra qualquer lugar.", "insight": "A garrafa Everest na mesma posição sendo pega por varias pessoas e so muda o cenário.\n\nREF: https://vimeo.com/875518491", "textos": "", "refs": "", "imgs": [], "files": [], "vids": []}, {"id": "p53", "day": null, "fmt": "reels", "status": "none", "animar": false, "frames": 0, "vertical": true, "title": "Fazer bichinhos dançantes em alguma imagem real com purificador…", "summary": "Fazer bichinhos dançantes em alguma imagem real com purificador…", "legenda": "É bem assim que FOZ da Everest deixa a gente tomando  água pura e gelada", "insight": "Fazer bichinhos dançantes em alguma imagem real com purificador FOZ da everest num lugar de natureza \nREF\n\nhttps://www.instagram.com/p/DdS4FSKMNeH/", "textos": "", "refs": "", "imgs": [], "files": [], "vids": []}];
+POSTS.forEach(p => p.month = 'novembro');
+const MONTHS = [['maio','Maio'],['junho','Junho'],['julho','Julho'],['agosto','Agosto'],['setembro','Setembro'],['outubro','Outubro'],['novembro','Novembro']].map(([k,n]) => ({k,n}));
+const ST = {em_aprovacao:'Em aprovação', aprovado:'Aprovado', ajuste:'Ajuste', insumos:'Aguardando insumos', postado:'Agendado/postado', none:'Sem status'};
+const ORDER = ['em_aprovacao','ajuste','insumos','aprovado','postado','none'];
+const FMT = {reels:'Reels', stories:'Stories', carrossel:'Carrossel', card:'Card', tbd:'A definir'};
+const ROLE = {admin:'Admin', equipe:'Usuário', cliente:'Cliente'};
+const MAX_UP = 20 * 1024 * 1024;
+
+let db = null, user = null, assets = null, local = false;
+let me = {id:null, name:'', avatar:'', canEdit:false};
+const S = {state:{}, comments:{}, members:{}, notifs:{}};
+const profiles = {}, asked = new Set();
+const ui = {month:null, view:'slides', fStatus:null, fAnim:false, open:null, pin:null, panel:null, mentions:[], busy:false};
+const view = {x:0, y:0, k:1, fitted:false};
+try { const v = localStorage.getItem('cron-view'); if (['slides','cal','list'].includes(v)) ui.view = v; } catch(e){}
+
+/* ---------- utilidades ---------- */
+const $ = s => document.querySelector(s);
+function h(tag, attrs, ...kids){
+  const e = document.createElement(tag);
+  for (const k in (attrs||{})) {
+    const v = attrs[k];
+    if (v == null || v === false) continue;
+    if (k === 'class') e.className = v; else if (k.startsWith('on')) e.addEventListener(k.slice(2), v);
+    else if (k === 'text') e.textContent = v; else e.setAttribute(k, v === true ? '' : v);
+  }
+  for (const c of kids.flat(3)) if (c != null && c !== false) e.append(c.nodeType ? c : document.createTextNode(c));
+  return e;
+}
+function linkify(text){
+  const out = []; let last = 0;
+  for (const m of text.matchAll(/https?:\/\/[^\s]+/g)) {
+    out.push(text.slice(last, m.index));
+    out.push(h('a', {href:m[0], target:'_blank', rel:'noopener', text:m[0].replace(/^https?:\/\/(www\.)?/, '').slice(0, 48) + (m[0].length > 60 ? '…' : '')}));
+    last = m.index + m[0].length;
+  }
+  out.push(text.slice(last)); return out;
+}
+let toastT; function toast(msg){ const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => t.hidden = true, 3800); }
+const fmtTime = ts => new Date(ts).toLocaleString('pt-BR', {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'});
+const dateLabel = p => p.day ? String(p.day).padStart(2,'0') + '/11' : 'Sem data';
+const uid = () => 'x' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+
+/* ---------- dados ---------- */
+const statusOf = p => (S.state[p.id] && S.state[p.id].status) || p.status;
+const animOf = p => (S.state[p.id] && 'animar' in S.state[p.id]) ? S.state[p.id].animar : p.animar;
+const commentsOf = p => Object.entries(S.comments).filter(([, c]) => c.postId === p.id).map(([id, c]) => ({id, ...c})).sort((a, b) => a.ts - b.ts);
+const openCount = p => Object.values(S.comments).filter(c => c.postId === p.id && !c.done).length;
+const match = p => (!ui.fStatus || statusOf(p) === ui.fStatus) && (!ui.fAnim || animOf(p));
+const myNotifs = () => Object.entries(S.notifs).filter(([, n]) => n.to === me.id).map(([id, n]) => ({id, ...n})).sort((a, b) => b.ts - a.ts);
+const unread = () => myNotifs().filter(n => !n.read).length;
+const nameOf = id => id === me.id ? (me.name || 'Você') : ((profiles[id] && profiles[id].name) || 'Alguém');
+const roleOf = id => (S.members[id] && S.members[id].role) || (id === me.id && me.canEdit ? 'admin' : (profiles[id] && profiles[id].guest ? 'cliente' : 'equipe'));
+function framesOf(p){
+  const st = S.state[p.id] || {}, out = (st.media || []).map(m => ({k:'a:' + m.id, kind:m.kind, src:'/_blob/' + m.id, up:m}));
+  (p.vids || []).forEach(v => out.push({k:'v:' + v, kind:'dvideo', src:`vid/${v}.jpg`, href:`https://drive.google.com/file/d/${v}/view`}));
+  p.imgs.forEach(n => out.push({k:'i:' + n, kind:'image', src:`img/${n}.jpg`}));
+  if (!out.length) for (let i = 0; i < p.frames; i++) out.push({k:'p:' + i, kind:'ph'});
+  return out;
+}
+async function saveDoc(col, id, data){
+  if (local) { S[col][id] = data; schedule(); return true; }
+  try { await db.doc(col + '/' + id).set(data); return true; }
+  catch (e) { toast(e && e.code === 'not_granted' ? 'Seu perfil não tem permissão para alterar isto.' : 'Não foi possível salvar. Tente de novo.'); return false; }
+}
+async function delDoc(col, id){ if (local) { delete S[col][id]; schedule(); return; } try { await db.doc(col + '/' + id).delete(); } catch(e) { toast('Não foi possível excluir.'); } }
+const patchState = (p, patch) => saveDoc('state', p.id, {...(S.state[p.id] || {}), ...patch, by:me.id, ts:Date.now()});
+
+function resolveProfiles(){
+  if (!user) return;
+  const ids = new Set(Object.keys(S.members));
+  Object.values(S.comments).forEach(c => { ids.add(c.by); (c.mentions || []).forEach(i => ids.add(i)); });
+  Object.values(S.notifs).forEach(n => ids.add(n.by));
+  const miss = [...ids].filter(i => i && !asked.has(i));
+  if (!miss.length) return;
+  miss.forEach(i => asked.add(i));
+  user.profiles(miss).then(ps => { Object.assign(profiles, ps); schedule(true); });
+}
+let registered = false;
+function onData(col){
+  if (col === 'members' && me.id && !S.members[me.id] && !registered) { registered = true; db.doc('members/' + me.id).set({firstSeen:Date.now()}).catch(() => {}); }
+  resolveProfiles(); schedule();
+}
+let raf = 0, force = false;
+function schedule(f){ force = force || !!f; if (raf) return; raf = requestAnimationFrame(() => { raf = 0; const x = force; force = false; render(x); }); }
+
+/* ---------- barra de perfil ---------- */
+function meBar(){
+  const n = unread();
+  return h('div', {class:'mebar'},
+    h('button', {class:'tbtn', onclick:() => openPanel('notifs')}, 'Notificações', n > 0 && h('span', {class:'badge', text:n})),
+    h('button', {class:'tbtn', onclick:() => openPanel('people')}, 'Pessoas'),
+    h('span', {class:'me'}, me.avatar && h('img', {class:'av', src:me.avatar, alt:''}), h('span', {class:'nm', text:me.name || 'Você'}), h('span', {class:'tag', text:ROLE[roleOf(me.id)]})));
+}
+
+/* ---------- visão macro ---------- */
+function monthStats(k){
+  const ps = POSTS.filter(p => p.month === k), c = s => ps.filter(p => statusOf(p) === s).length;
+  return {n:ps.length, ok:c('aprovado') + c('postado'), wait:c('em_aprovacao'), open:ps.reduce((a, p) => a + openCount(p), 0), imgs:ps.flatMap(p => [...(p.vids || []).map(v => [`vid/${v}.jpg`, p.vertical]), ...p.imgs.map(n => [`img/${n}.jpg`, p.vertical])])};
+}
+let homeSig = '';
+function renderHome(){
+  const sig = JSON.stringify([MONTHS.map(m => { const s = monthStats(m.k); return [s.ok, s.wait, s.open]; }), unread(), me.name, roleOf(me.id), local]);
+  const app = $('#app');
+  if (sig === homeSig && app.dataset.v === 'home') return;
+  homeSig = sig; app.dataset.v = 'home';
+  const world = h('div', {class:'world', id:'world'}, MONTHS.map(m => {
+    const s = monthStats(m.k);
+    return h('button', {class:'cluster' + (s.n ? '' : ' empty'), 'aria-label':`Abrir ${m.n}`, onclick:() => { if (!pan.moved) enter(m.k); }},
+      s.n ? h('div', {class:'thumbs'}, s.imgs.map(([n, v]) => h('img', {src:n, alt:'', draggable:'false', style:`width:${v ? 84 : 120}px`}))) : null,
+      h('div', {class:'mlabel'}, m.n, s.n ? h('sup', {text:s.n}) : null),
+      h('div', {class:'msub', text:s.n ? `${s.ok} aprovados ou postados · ${s.wait} em aprovação · ${s.open} comentários abertos` : 'Ainda sem posts importados'}));
+  }));
+  const board = h('div', {class:'board', id:'board'}, world);
+  app.replaceChildren(board,
+    h('div', {class:'corner tl'}, h('b', {text:'Everest'}), h('span', {class:'mut', text:'Cronogramas 2026'})),
+    h('div', {class:'corner tr'}, meBar()),
+    h('div', {class:'corner bl', text:local ? 'Modo demonstração: nada é salvo fora deste navegador' : 'Arraste para navegar · role para dar zoom · clique em um mês para abrir'}),
+    h('div', {class:'corner br'}, h('button', {class:'tbtn', onclick:() => zoomAt(innerWidth / 2, innerHeight / 2, 1 / 1.3), 'aria-label':'Diminuir zoom', text:'−'}), h('span', {id:'zoom'}),
+      h('button', {class:'tbtn', onclick:() => zoomAt(innerWidth / 2, innerHeight / 2, 1.3), 'aria-label':'Aumentar zoom', text:'+'}), h('button', {class:'tbtn', onclick:fit, text:'Ajustar'})));
+  bindBoard(board);
+  if (!view.fitted) fit(); else applyView();
+}
+const pan = {ptr:new Map(), moved:false, d0:0};
+function applyView(){ const w = $('#world'); if (!w) return; w.style.transform = `translate(${view.x}px,${view.y}px) scale(${view.k})`; const z = $('#zoom'); if (z) z.textContent = Math.round(view.k * 100) + '%'; }
+function fit(){
+  const w = $('#world'); if (!w) return;
+  const ww = w.offsetWidth, wh = w.offsetHeight;
+  view.k = Math.min(innerWidth / ww, (innerHeight - 70) / wh, 1);
+  view.x = (innerWidth - ww * view.k) / 2; view.y = (innerHeight - wh * view.k) / 2;
+  view.fitted = true; applyView();
+}
+function zoomAt(cx, cy, f){ const k = Math.min(3, Math.max(.06, view.k * f)), r = k / view.k; view.x = cx - (cx - view.x) * r; view.y = cy - (cy - view.y) * r; view.k = k; applyView(); }
+function bindBoard(b){
+  b.addEventListener('pointerdown', e => { pan.ptr.set(e.pointerId, {x:e.clientX, y:e.clientY}); if (pan.ptr.size === 1) pan.moved = false; pan.d0 = 0; b.classList.add('drag'); });
+  b.addEventListener('pointermove', e => {
+    const p = pan.ptr.get(e.pointerId); if (!p) return;
+    const dx = e.clientX - p.x, dy = e.clientY - p.y;
+    if (pan.ptr.size === 1) { if (Math.abs(dx) + Math.abs(dy) > 4) pan.moved = true; if (pan.moved) { view.x += dx; view.y += dy; applyView(); } }
+    p.x = e.clientX; p.y = e.clientY;
+    if (pan.ptr.size === 2) { const [a, c] = [...pan.ptr.values()], d = Math.hypot(a.x - c.x, a.y - c.y); if (pan.d0) zoomAt((a.x + c.x) / 2, (a.y + c.y) / 2, d / pan.d0); pan.d0 = d; pan.moved = true; }
+  });
+  const up = e => { pan.ptr.delete(e.pointerId); pan.d0 = 0; if (!pan.ptr.size) b.classList.remove('drag'); };
+  b.addEventListener('pointerup', up); b.addEventListener('pointercancel', up); b.addEventListener('pointerleave', up);
+  b.addEventListener('wheel', e => { e.preventDefault(); zoomAt(e.clientX, e.clientY, Math.exp(-e.deltaY * (e.ctrlKey ? .01 : .0018))); }, {passive:false});
+}
+
+/* ---------- ambiente do mês ---------- */
+let mainSig = '';
+function renderMonth(){
+  const m = MONTHS.find(x => x.k === ui.month), posts = POSTS.filter(p => p.month === ui.month);
+  const sig = JSON.stringify([ui.month, ui.view, ui.fStatus, ui.fAnim, posts.map(p => [statusOf(p), animOf(p), openCount(p), (S.state[p.id] && S.state[p.id].media || []).length]), unread(), me.name, roleOf(me.id), local]);
+  const app = $('#app');
+  if (sig === mainSig && app.dataset.v === 'month') return;
+  mainSig = sig; app.dataset.v = 'month';
+  const counts = {}; ORDER.forEach(k => counts[k] = 0); let anim = 0;
+  posts.forEach(p => { counts[statusOf(p)]++; if (animOf(p)) anim++; });
+  const seg = h('div', {class:'seg', id:'viewseg', role:'group', 'aria-label':'Visualização'}, [['slides','Slides'],['cal','Calendário'],['list','Lista']].map(([k, n]) =>
+    h('button', {'aria-pressed':String(ui.view === k), onclick:() => { ui.view = k; try { localStorage.setItem('cron-view', k); } catch(e){} render(); }, text:n})));
+  const chips = h('div', {class:'chips'}, ORDER.map(k => h('button', {class:'chip s-' + k, 'aria-pressed':String(ui.fStatus === k), onclick:() => { ui.fStatus = ui.fStatus === k ? null : k; render(); }}, h('span', {class:'dot'}), ST[k], h('b', {text:counts[k]}))),
+    h('button', {class:'chip s-anim', 'aria-pressed':String(ui.fAnim), onclick:() => { ui.fAnim = !ui.fAnim; render(); }}, h('span', {class:'dot'}), 'A animar', h('b', {text:anim})));
+  let body;
+  if (!posts.length) body = h('div', {class:'empty', text:`${m.n} ainda não foi importado. As artes desse mês estão no Figma; falta o cronograma com legendas e status.`});
+  else if (ui.view === 'slides') body = slidesView(posts);
+  else if (ui.view === 'cal') body = calView(posts);
+  else body = listView(posts);
+  app.replaceChildren(
+    h('header', {class:'top'}, h('div', {class:'wrap'},
+      h('div', {class:'brand'}, h('button', {class:'back', onclick:goHome, text:'← Cronogramas'}), h('h1', {text:`${m.n} 2026`})), meBar())),
+    h('main', {class:'wrap'},
+      local && h('p', {class:'banner', text:'Modo demonstração: sem conexão com o armazenamento, então status e comentários não são salvos.'}),
+      posts.length ? h('div', {class:'bar', 'aria-hidden':'true'}, ORDER.map(k => counts[k] ? h('span', {class:'s-' + k, style:`flex:${counts[k]};background:${k === 'none' ? 'var(--border)' : 'var(--c)'}`}) : null)) : null,
+      posts.length ? h('div', {class:'tools'}, chips, seg) : null,
+      body));
+  autoVideos();
+}
+function mediaEl(f, p, i, drawer){
+  if (f.kind === 'dvideo') return h('a', {class:'frame dv ' + (p.vertical ? 'v' : 'q'), href:f.href, target:'_blank', rel:'noopener', title:'Abrir o vídeo no Drive'},
+    h('img', {src:f.src, alt:`Vídeo ${i + 1}`, loading:'lazy', draggable:'false'}), h('span', {class:'play', 'aria-hidden':'true', text:'▶'}), h('span', {class:'lb', text:'Vídeo · abrir no Drive ↗'}));
+  const el = h('div', {class:'frame ' + (p.vertical ? 'v' : 'q')});
+  if (f.kind === 'video') el.append(h('video', {src:f.src, controls:true, muted:true, loop:true, playsinline:true, preload:'metadata', 'data-auto':!drawer}), h('span', {class:'vtag', text:'Vídeo'}));
+  else if (f.kind === 'image') el.append(h('img', {src:f.src, alt:`Peça ${i + 1}`, loading:'lazy', draggable:'false'}), h('span', {class:'lb', text:String(i + 1)}));
+  else el.append(h('span', {class:'lb', text:`${p.fmt === 'reels' ? 'Vídeo' : 'Peça'} ${i + 1}`}));
+  return el;
+}
+function slidesView(posts){
+  const list = posts.filter(match);
+  if (!list.length) return h('div', {class:'empty', text:'Nenhum post com esse filtro.'});
+  return h('div', {class:'slides'}, list.map((p, i) => {
+    const s = statusOf(p), fr = framesOf(p), n = openCount(p);
+    return h('article', {class:'slide'},
+      h('div', {class:'sl-l'},
+        h('div', {class:'sl-meta'}, h('span', {text:`${dateLabel(p)} · ${FMT[p.fmt]}`}), h('span', {style:'font-variant-numeric:tabular-nums', text:`${i + 1} / ${list.length}`})),
+        h('h3', {text:p.title}),
+        h('div', {class:'ctl'}, h('span', {class:'pill s-' + s}, ST[s]), animOf(p) && h('span', {class:'pill s-anim', text:'A animar'})),
+        p.legenda && h('div', {class:'sl-t'}, h('h4', {text:'Legenda'}), h('p', {text:p.legenda})),
+        p.insight && h('div', {class:'sl-t'}, h('h4', {text:'Insight e roteiro'}), h('p', null, linkify(p.insight))),
+        h('div', {class:'sl-foot'}, h('button', {class:'btn', onclick:() => openPost(p.id), text:n ? `${n} comentário${n > 1 ? 's' : ''} em aberto` : 'Comentar'}),
+          p.files.length ? h('button', {class:'btn ghost', onclick:() => openPost(p.id), text:`${p.files.length} ${p.files.length > 1 ? 'arquivos finais' : 'arquivo final'}`}) : null)),
+      h('div', {class:'sl-r'}, fr.length ? fr.map((f, j) => mediaEl(f, p, j, false)) : h('div', {class:'noart', text:'Sem criativo ainda'})));
+  }));
+}
+function calView(posts){
+  const cal = h('div', {class:'cal', id:'cal'}, ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'].map(d => h('div', {class:'dow', text:d})));
+  for (let i = 0; i < 42; i++) {
+    const d = i - 5; // 1/11/2026 cai num domingo
+    if (d < 1 || d > 30) { cal.append(h('div', {class:'day off'})); continue; }
+    cal.append(h('div', {class:'day' + (d === 13 ? ' today' : '')}, h('span', {class:'num', text:String(d).padStart(2,'0')}), posts.filter(p => p.day === d).map(p => {
+      const n = openCount(p);
+      return h('button', {class:`ev s-${statusOf(p)}${match(p) ? '' : ' dim'}`, title:`${FMT[p.fmt]} · ${ST[statusOf(p)]}`, onclick:() => openPost(p.id)},
+        h('span', {class:'t', text:FMT[p.fmt]}), animOf(p) && h('span', {class:'mk', title:'A animar', text:'▶'}), n > 0 && h('span', {class:'mk', text:'💬' + n}));
+    })));
+  }
+  return h('div', null, cal, h('div', {id:'list', hidden:true, class:'list'}, listRows(posts)));
+}
+function listRows(posts){
+  const out = [];
+  for (const d of [...new Set(posts.map(p => p.day))].sort((a, b) => (a || 99) - (b || 99))) {
+    const ps = posts.filter(p => p.day === d && match(p)); if (!ps.length) continue;
+    out.push(h('section', {class:'grp'}, h('h2', {text:d ? `${String(d).padStart(2,'0')} de novembro` : 'Ideias sem data'}), h('div', {class:'rows'}, ps.map(p => {
+      const n = openCount(p), s = statusOf(p), f0 = framesOf(p).find(f => f.kind === 'image' || f.kind === 'dvideo');
+      return h('button', {class:'row', onclick:() => openPost(p.id)},
+        f0 ? h('img', {class:'th', src:f0.src, alt:'', loading:'lazy'}) : h('span', {class:'th'}),
+        h('span', {class:'f', text:FMT[p.fmt]}), h('span', {class:'sum', text:p.title}),
+        h('span', {class:'meta'}, animOf(p) && h('span', {class:'pill s-anim', text:'A animar'}), n > 0 && h('span', {class:'cnt', text:`${n} comentário${n > 1 ? 's' : ''}`}), h('span', {class:'pill s-' + s}, ST[s])));
+    }))));
+  }
+  return out.length ? out : [h('div', {class:'empty', text:'Nenhum post com esse filtro.'})];
+}
+const listView = posts => h('div', {class:'list'}, listRows(posts));
+let io = null;
+function autoVideos(){
+  if (io) io.disconnect();
+  if (!('IntersectionObserver' in window)) return;
+  io = new IntersectionObserver(es => es.forEach(e => { if (e.intersectionRatio > .6) e.target.play().catch(() => {}); else e.target.pause(); }), {threshold:[0, .6]});
+  document.querySelectorAll('video[data-auto]').forEach(v => io.observe(v));
+}
+
+/* ---------- gaveta do post ---------- */
+let drawerSig = '';
+function renderDrawer(forceIt){
+  const ov = $('#overlay');
+  if (ui.panel) return renderPanel(forceIt);
+  const p = POSTS.find(x => x.id === ui.open);
+  if (!p) { if (ov.firstChild) ov.replaceChildren(); drawerSig = ''; return; }
+  const cs = commentsOf(p), fr = framesOf(p), s = statusOf(p), admin = me.canEdit, canWrite = !!me.id;
+  const sig = JSON.stringify([p.id, s, animOf(p), cs, fr.map(f => f.k), ui.pin, ui.mentions, ui.busy, Object.keys(profiles).length, admin]);
+  if (!forceIt && sig === drawerSig) return;
+  drawerSig = sig;
+  const old = ov.querySelector('#comment-text'), draft = old ? old.value : '', hadFocus = old && document.activeElement === old, caret = old ? old.selectionStart : 0;
+  const scroll = ov.querySelector('.db') ? ov.querySelector('.db').scrollTop : 0;
+  const pinned = cs.filter(c => c.pin);
+  const frames = h('div', {class:'frames'}, fr.map((f, i) => {
+    const el = mediaEl(f, p, i, true);
+    if (f.kind !== 'video' && f.kind !== 'dvideo' && canWrite) { el.style.cursor = 'crosshair'; el.title = 'Clique para fixar um comentário neste ponto';
+      el.addEventListener('click', e => { if (e.target.closest('.rm')) return; const r = el.getBoundingClientRect(); ui.pin = {k:f.k, x:Math.round((e.clientX - r.left) / r.width * 100), y:Math.round((e.clientY - r.top) / r.height * 100)}; renderDrawer(); const t = $('#comment-text'); if (t) t.focus(); }); }
+    pinned.forEach((c, n) => { if (c.pin.k === f.k) el.append(h('span', {class:'pin' + (c.done ? ' ok' : ''), style:`left:${c.pin.x}%;top:${c.pin.y}%`, text:n + 1})); });
+    if (ui.pin && ui.pin.k === f.k) el.append(h('span', {class:'pin new', style:`left:${ui.pin.x}%;top:${ui.pin.y}%`, text:'+'}));
+    if (f.up && admin) el.append(h('button', {class:'rm', 'aria-label':'Remover arquivo', title:'Remover', text:'×', onclick:() => removeMedia(p, f.up)}));
+    return el;
+  }));
+  const sec = (t, body) => body && h('div', {class:'sec'}, h('h3', {text:t}), h('p', null, linkify(body)));
+  const ta = h('textarea', {id:'comment-text', placeholder:canWrite ? 'Escreva seu comentário. Use @ para marcar alguém.' : 'Entre com sua conta para comentar.', 'aria-label':'Novo comentário', disabled:!canWrite, oninput:onType});
+  ta.value = draft;
+  const body = h('div', {class:'db'},
+    h('div', {class:'ctl'},
+      admin ? h('select', {id:'status-select', 'aria-label':'Status', onchange:e => patchState(p, {status:e.target.value})}, ORDER.map(k => h('option', {value:k, selected:k === s, text:ST[k]})))
+            : h('span', {class:'pill s-' + s}, ST[s]),
+      admin ? h('button', {class:'tog', 'aria-pressed':String(!!animOf(p)), onclick:() => patchState(p, {animar:!animOf(p)}), text:animOf(p) ? '▶ A animar' : 'Estático'})
+            : (animOf(p) ? h('span', {class:'pill s-anim', text:'A animar'}) : h('span', {class:'cnt', text:'Estático'}))),
+    h('div', {class:'sec'}, h('h3', {text:fr.length ? `Criativo · ${fr.length} ${fr.length > 1 ? 'peças' : 'peça'}` : 'Criativo'}), fr.length ? frames : h('p', {text:'Ainda sem criativo.'}),
+      admin && (assets || local) ? h('div', {class:'up'}, h('label', {for:'up-file'}, ui.busy ? 'Enviando…' : 'Adicionar vídeo ou imagem'),
+        h('input', {id:'up-file', type:'file', accept:'video/mp4,video/webm,video/quicktime,image/*', multiple:true, disabled:ui.busy, onchange:e => addMedia(p, [...e.target.files])}), h('span', {text:'Até 20 MB por arquivo.'})) : null),
+    p.files.length ? h('div', {class:'sec'}, h('h3', {text:`Arquivos finais · ${p.files.length}`}), h('div', {class:'files'}, p.files.map(f => h('a', {class:'file', href:`https://drive.google.com/file/d/${f[1]}/view`, target:'_blank', rel:'noopener'},
+      h('span', {class:'tag', text:/\.mp4$/i.test(f[0]) ? 'Vídeo' : 'Imagem'}), h('span', {class:'fn', text:f[0]}), h('span', {class:'go', text:'Abrir no Drive ↗'}))))) : null,
+    sec('Legenda', p.legenda), sec('Insight e roteiro', p.insight), sec('Textos na arte', p.textos), sec('Referências', p.refs),
+    h('div', {class:'sec'}, h('h3', {text:`Comentários · ${cs.length}`}),
+      cs.length ? h('div', {class:'cm'}, cs.map(c => h('div', {class:'c' + (c.done ? ' done' : '')},
+        h('div', {class:'hd'}, profiles[c.by] && h('img', {class:'av', src:profiles[c.by].avatarUrl, alt:''}), h('b', {text:nameOf(c.by)}), h('span', {class:'tag', text:ROLE[roleOf(c.by)]}), h('span', {text:fmtTime(c.ts)}),
+          c.pin && h('span', {class:'tag', text:`Ponto ${pinned.indexOf(c) + 1}`}), c.done && h('span', {class:'tag', text:'Resolvido'}),
+          admin && h('button', {class:'lnk', text:c.done ? 'Reabrir' : 'Resolver', onclick:() => { const {id, ...d} = c; saveDoc('comments', id, {...d, done:!c.done}); }})),
+        h('p', null, (c.mentions || []).map(i => h('span', {class:'at', text:'@' + nameOf(i) + ' '})), c.text))))
+      : h('p', {text:'Nenhum comentário ainda.'})));
+  ov.replaceChildren(
+    h('div', {class:'scrim', onclick:closeOverlay}),
+    h('aside', {class:'drawer', role:'dialog', 'aria-modal':'true', 'aria-label':'Detalhe do post'},
+      h('div', {class:'dh'}, h('h2', null, h('small', {text:`${dateLabel(p)} · ${FMT[p.fmt]}`}), p.title), h('button', {class:'x', 'aria-label':'Fechar', onclick:closeOverlay, text:'×'})),
+      body,
+      h('div', {class:'df'},
+        h('div', {id:'mpick'}),
+        ui.mentions.length ? h('div', {class:'mchips'}, ui.mentions.map(i => h('span', {class:'mchip'}, '@' + nameOf(i), h('button', {'aria-label':'Remover marcação', text:'×', onclick:() => { ui.mentions = ui.mentions.filter(x => x !== i); renderDrawer(); }})))) : null,
+        ta,
+        h('div', {class:'r'},
+          h('span', {class:'pinmsg'}, ui.pin ? 'Ponto fixado na peça. ' : (canWrite && fr.some(f => f.kind === 'image' || f.kind === 'ph') ? 'Clique numa peça para apontar o lugar exato.' : ''),
+            ui.pin && h('button', {class:'lnk', style:'margin:0', text:'Remover ponto', onclick:() => { ui.pin = null; renderDrawer(); }})),
+          h('button', {class:'btn', disabled:!canWrite, text:'Comentar', onclick:() => sendComment(p)})))));
+  ov.querySelector('.db').scrollTop = scroll;
+  if (hadFocus) { const t = $('#comment-text'); t.focus(); try { t.setSelectionRange(caret, caret); } catch(e){} }
+}
+async function sendComment(p){
+  const ta = $('#comment-text'), text = ta.value.trim();
+  if (!text) { ta.focus(); return; }
+  const id = uid(), mentions = [...ui.mentions], c = {postId:p.id, by:me.id, text, ts:Date.now(), pin:ui.pin, done:false, mentions};
+  ta.value = ''; ui.pin = null; ui.mentions = [];
+  if (!await saveDoc('comments', id, c)) { ta.value = text; return; }
+  for (const to of mentions) if (to !== me.id) saveDoc('notifs', uid(), {to, by:me.id, postId:p.id, commentId:id, text:text.slice(0, 140), ts:Date.now(), read:false, emailed:false});
+  renderDrawer(true);
+}
+let pickT = 0;
+function onType(e){
+  const ta = e.target, m = /(^|\s)@([^\s@]{0,30})$/.exec(ta.value.slice(0, ta.selectionStart)), box = $('#mpick');
+  if (!m) { box.replaceChildren(); return; }
+  const q = m[2].toLowerCase(), t = ++pickT;
+  const known = Object.keys(S.members).filter(i => i !== me.id && profiles[i]).map(i => profiles[i]);
+  const show = list => {
+    if (t !== pickT) return;
+    const seen = new Set(ui.mentions), rows = list.filter(x => x && x.id && x.id !== me.id && !seen.has(x.id) && (seen.add(x.id), true) && (x.name || '').toLowerCase().includes(q)).slice(0, 8);
+    box.replaceChildren(h('div', {class:'mpick'}, rows.length ? rows.map(x => h('button', {onclick:() => {
+      profiles[x.id] = profiles[x.id] || x; ui.mentions.push(x.id);
+      const pos = ta.selectionStart, start = pos - m[2].length - 1; ta.value = ta.value.slice(0, start) + ta.value.slice(pos); renderDrawer(true); const n = $('#comment-text'); n.focus(); n.setSelectionRange(start, start);
+    }}, h('img', {class:'av', src:x.avatarUrl, alt:''}), h('span', {text:x.name || 'Sem nome'}), x.guest && h('span', {class:'tag', text:'Convidado'}))) : h('div', {class:'none', text:user ? 'Ninguém encontrado com esse nome.' : 'Marcações funcionam no app publicado, com as pessoas que têm acesso.'})));
+  };
+  show(known);
+  if (user) user.search(m[2]).then(hits => show([...known, ...hits]));
+}
+async function addMedia(p, files){
+  if (!files.length) return;
+  if (local) { toast('No modo demonstração o envio de arquivos fica desligado.'); return; }
+  const big = files.filter(f => f.size > MAX_UP), ok = files.filter(f => f.size <= MAX_UP);
+  if (big.length) toast(`${big.length > 1 ? 'Alguns arquivos passam' : big[0].name + ' passa'} de 20 MB. Exporte uma versão mais leve.`);
+  if (!ok.length) return;
+  ui.busy = true; renderDrawer();
+  const media = [...((S.state[p.id] || {}).media || [])];
+  for (const f of ok) {
+    try { const r = await assets.upload(f); media.push({id:r.id, kind:r.contentType.startsWith('video') ? 'video' : 'image', name:f.name}); }
+    catch (e) { toast(`Não foi possível enviar ${f.name}.`); }
+  }
+  ui.busy = false; await patchState(p, {media}); renderDrawer(true);
+}
+async function removeMedia(p, m){
+  await patchState(p, {media:((S.state[p.id] || {}).media || []).filter(x => x.id !== m.id)});
+  if (assets) assets.delete(m.id).catch(() => {});
+}
+
+/* ---------- painéis: notificações e pessoas ---------- */
+function renderPanel(){
+  const ov = $('#overlay'); let title, body;
+  if (ui.panel === 'notifs') {
+    const ns = myNotifs(); title = 'Notificações';
+    body = ns.length ? h('div', {class:'plist'}, ns.map(n => { const p = POSTS.find(x => x.id === n.postId);
+      return h('button', {class:'prow' + (n.read ? '' : ' unread'), onclick:() => { const {id, ...d} = n; if (!n.read) saveDoc('notifs', id, {...d, read:true}); ui.panel = null; if (p) { ui.month = p.month; ui.open = p.id; } render(true); }},
+        profiles[n.by] && h('img', {class:'av', src:profiles[n.by].avatarUrl, alt:''}),
+        h('span', {style:'min-width:0'}, h('span', {class:'t', style:'display:block', text:`${nameOf(n.by)} marcou você${p ? ` em ${dateLabel(p)} · ${FMT[p.fmt]}` : ''}`}), h('span', {class:'s', style:'display:block', text:n.text}), h('span', {class:'s', text:fmtTime(n.ts)}))); }))
+      : h('p', {class:'note', text:me.id ? 'Quando alguém marcar você com @ em um comentário, o aviso aparece aqui.' : 'Entre com sua conta para receber notificações.'});
+  } else {
+    title = 'Pessoas';
+    const ids = Object.keys(S.members);
+    body = h('div', {style:'display:flex;flex-direction:column;gap:14px'},
+      h('p', {class:'note', text:'Aparece aqui quem já abriu o app. Admin altera status, animação e arquivos; Usuário é o time da agência; Cliente comenta e acompanha. Para dar acesso a alguém novo, use o menu Compartilhar do artifact.'}),
+      ids.length ? h('div', {class:'plist'}, ids.map(i => h('div', {class:'prow'},
+        profiles[i] && h('img', {class:'av', src:profiles[i].avatarUrl, alt:''}), h('span', {class:'nm', text:nameOf(i) + (i === me.id ? ' (você)' : '')}),
+        profiles[i] && profiles[i].guest && h('span', {class:'tag', text:'Convidado'}),
+        me.canEdit ? h('select', {'aria-label':'Perfil de ' + nameOf(i), onchange:e => saveDoc('members', i, {...S.members[i], role:e.target.value})}, Object.keys(ROLE).map(r => h('option', {value:r, selected:roleOf(i) === r, text:ROLE[r]})))
+                   : h('span', {class:'tag', text:ROLE[roleOf(i)]}))))
+        : h('p', {class:'note', text:'Ninguém registrado ainda.'}));
+  }
+  ov.replaceChildren(h('div', {class:'scrim', onclick:closeOverlay}),
+    h('aside', {class:'drawer', role:'dialog', 'aria-modal':'true', 'aria-label':title}, h('div', {class:'dh'}, h('h2', {text:title}), h('button', {class:'x', 'aria-label':'Fechar', onclick:closeOverlay, text:'×'})), h('div', {class:'db'}, body)));
+  drawerSig = '';
+}
+function openPanel(k){ ui.panel = k; ui.open = null; render(true); }
+function openPost(id){ ui.open = id; ui.panel = null; ui.pin = null; ui.mentions = []; $('#overlay').replaceChildren(); renderDrawer(true); }
+function closeOverlay(){ ui.open = null; ui.panel = null; ui.pin = null; ui.mentions = []; $('#overlay').replaceChildren(); drawerSig = ''; }
+
+/* ---------- navegação ---------- */
+function enter(k){ ui.month = k; ui.fStatus = null; ui.fAnim = false; try { location.hash = k; } catch(e){} render(); scrollTo(0, 0); }
+function goHome(){ ui.month = null; try { location.hash = ''; } catch(e){} render(); }
+addEventListener('hashchange', () => { const k = location.hash.slice(1), ok = MONTHS.some(m => m.k === k); if ((ok ? k : null) !== ui.month) { ui.month = ok ? k : null; closeOverlay(); render(); } });
+addEventListener('keydown', e => { if (e.key === 'Escape' && (ui.open || ui.panel)) closeOverlay(); });
+addEventListener('resize', () => { if (!ui.month && !view.fitted) fit(); });
+function render(f){
+  document.documentElement.classList.toggle('home', !ui.month);
+  if (f) { homeSig = ''; mainSig = ''; }
+  if (ui.month) renderMonth(); else renderHome();
+  renderDrawer(f);
+}
+
+/* ---------- inicialização ---------- */
+async function boot(){
+  const k = location.hash.slice(1); if (MONTHS.some(m => m.k === k)) ui.month = k;
+  render();
+  const use = n => (window.claude && window.claude.use) ? window.claude.use(n).catch(() => null) : Promise.resolve(null);
+  [db, user, assets] = await Promise.all([use('db'), use('user'), use('assets')]);
+  if (user) { const m = await user.me(); me = {id:m.id, name:m.name, avatar:m.avatarUrl, canEdit:m.canEdit}; }
+  if (!db) { local = true; if (!me.id) me = {id:'local', name:'Você', avatar:'', canEdit:true}; render(true); return; }
+  for (const c of ['state','comments','members','notifs'])
+    db.collection(c).onSnapshot(s => { S[c] = Object.fromEntries(s.docs.map(d => [d.id, d.data()])); onData(c); }, () => {});
+  render(true);
+}
+boot();
+</script>
