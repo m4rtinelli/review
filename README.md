@@ -21,9 +21,11 @@ Aberto fora do claude.ai, o app entra em modo demonstração e não salva nada.
 
 ```
 index.html                o app inteiro (HTML, CSS e JS num arquivo só)
-img/                      artes exportadas da página NOVEMBRO do Figma
-vid/                      capas dos vídeos, recortadas do Google Slides (nome = id do arquivo no Drive)
-data/posts-novembro.json  cópia legível dos posts que estão embutidos no index.html
+img/                      artes de novembro, exportadas da página NOVEMBRO do Figma
+vid/                      capas dos vídeos de novembro, recortadas do Google Slides (nome = id do arquivo no Drive)
+sp/                       imagens dos outros meses, tiradas dos slides, em folhas de 16 peças (<mês>-N.jpg)
+data/posts-<mês>.json     cópia legível dos posts de cada mês, que estão embutidos no index.html
+tools/import_month.py     importa um deck do Google Slides para data/ e sp/
 ```
 
 ## Telas
@@ -46,12 +48,13 @@ Regras de acesso: `state` e `members` só são alterados por quem pode editar o 
 
 ## De onde vem o conteúdo
 
-- Textos e status: Google Slides "CRONOGRAMA EVEREST | NOVEMBRO 2026".
-- Artes: Figma "Everest - Social Ciclos", página NOVEMBRO.
-- Arquivos finais: pasta `11_NOVEMBRO` do Drive.
+- Textos e status: decks "CRONOGRAMA EVEREST | <MÊS> 2026" do Google Slides, de maio a dezembro.
+- Novembro: artes do Figma "Everest - Social Ciclos" (página NOVEMBRO) e arquivos finais da pasta `11_NOVEMBRO` do Drive.
+- Outros meses: imagens que estão nos próprios slides. Vídeos aparecem sem capa, com link para o Drive.
 
 ## Pendências
 
-- Importar os meses de maio a outubro (hoje só novembro tem posts).
+- Capas de vídeo e arquivos finais do Drive para os meses fora de novembro.
+- Janeiro a abril de 2026 (os decks existem no Drive, ainda não importados).
 - Criar e editar posts pelo app.
 - Notificação por e-mail (a plataforma não envia; precisa de servidor próprio).

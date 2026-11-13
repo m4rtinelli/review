@@ -1,0 +1,195 @@
+[
+ {
+  "id": "dezembro-p8",
+  "month": "dezembro",
+  "day": 2,
+  "fmt": "reels",
+  "status": "postado",
+  "animar": false,
+  "frames": 0,
+  "vertical": true,
+  "title": "Foi aqui que pediram água pura de verdade?",
+  "legenda": "Foi aqui que pediram água pura de verdade?\nDeixa com a gente! Purificadores Everest são garantia de qualidade na água que você e sua família bebem todos os dias. \nE com a garrafa Niva, essa água boa vai junto para qualquer lugar.\nConheça tudo pelo link da bio.",
+  "insight": "",
+  "textos": "",
+  "refs": "",
+  "imgs": [],
+  "sp": [],
+  "vids": [
+   "1VQrwBfz9SSvfwoZyVx-3iPTixCyv8Euz"
+  ],
+  "files": []
+ },
+ {
+  "id": "dezembro-p9",
+  "month": "dezembro",
+  "day": 2,
+  "fmt": "stories",
+  "status": "postado",
+  "animar": false,
+  "frames": 0,
+  "vertical": true,
+  "title": "Stories de 02",
+  "legenda": "",
+  "insight": "",
+  "textos": "",
+  "refs": "",
+  "imgs": [],
+  "sp": [
+   [
+    0,
+    1,
+    1,
+    405,
+    720
+   ],
+   [
+    0,
+    2,
+    1,
+    405,
+    720
+   ],
+   [
+    0,
+    3,
+    1,
+    405,
+    720
+   ],
+   [
+    0,
+    0,
+    2,
+    405,
+    720
+   ],
+   [
+    0,
+    1,
+    2,
+    405,
+    720
+   ]
+  ],
+  "vids": [],
+  "files": []
+ },
+ {
+  "id": "dezembro-p7",
+  "month": "dezembro",
+  "day": 4,
+  "fmt": "carrossel",
+  "status": "postado",
+  "animar": false,
+  "frames": 0,
+  "vertical": false,
+  "title": "Talvez você ainda não esteja preparado para tomar essas decisões,…",
+  "legenda": "Talvez você ainda não esteja preparado para tomar essas decisões, mas tudo bem… A gente te ajuda! 😔\n\nCom Everest na sua rotina, fica tudo mais fácil. \nClique no link da bio e conheça!",
+  "insight": "",
+  "textos": "",
+  "refs": "ttps://www.instagram.com/p/Db8gfl7jouI/",
+  "imgs": [],
+  "sp": [
+   [
+    0,
+    3,
+    0,
+    405,
+    262
+   ],
+   [
+    0,
+    0,
+    1,
+    405,
+    506
+   ]
+  ],
+  "vids": [],
+  "files": []
+ },
+ {
+  "id": "dezembro-p6",
+  "month": "dezembro",
+  "day": 6,
+  "fmt": "reels",
+  "status": "aprovado",
+  "animar": false,
+  "frames": 0,
+  "vertical": true,
+  "title": "Um take estilo Chefs Table com os ingredientes para um prato feito…",
+  "legenda": "A mudança foi pequena…mas a diferença, enorme!\nO Dalton te conta como o projeto Água da Casa transformou a rotina do restaurante dele, o Miró.",
+  "insight": "Um take estilo Chefs Table com os ingredientes para um prato feito no restaurante junto de agua da everest.  A camera faz uma rotacao e transicao de flip da mesa e muda para o prato ja pronto com copo de agua da everest.\n\n\nROTEIRO MIRÓ: https://drive.google.com/drive/folders/1HZO5KR4600mXKDoPrGrRpIoYvesRYBAn?usp=drive_link\n\nRef:\nhttps://www.youtube.com/watch?v=6bZsgSfEMYY\nhttps://vimeo.com/526133272?share=copy&fl=cl&fe=ci",
+  "textos": "Miró",
+  "refs": "",
+  "imgs": [],
+  "sp": [],
+  "vids": [
+   "1qU2jS5tcs2UNCyYUYuEfcasyY-Fvih8V"
+  ],
+  "files": []
+ },
+ {
+  "id": "dezembro-p4",
+  "month": "dezembro",
+  "day": 7,
+  "fmt": "carrossel",
+  "status": "postado",
+  "animar": false,
+  "frames": 0,
+  "vertical": false,
+  "title": "Pra onde vai a casca de banana do café ou lanche da manhã?",
+  "legenda": "Pra onde vai a casca de banana do café ou lanche da manhã? \nNa Everest, os resíduos orgânicos da fábrica não terminam no lixo: eles seguem para a compostagem e voltam para a terra como adubo orgânico.\nSó em novembro foram 2.326,5 kg de resíduos transformados em 465,3kg de adubo, evitando a emissão de 3,46 toneladas de CO₂.",
+  "insight": "",
+  "textos": "",
+  "refs": "",
+  "imgs": [],
+  "sp": [
+   [
+    0,
+    0,
+    0,
+    405,
+    506
+   ],
+   [
+    0,
+    1,
+    0,
+    405,
+    262
+   ],
+   [
+    0,
+    2,
+    0,
+    405,
+    506
+   ]
+  ],
+  "vids": [],
+  "files": []
+ },
+ {
+  "id": "dezembro-p5",
+  "month": "dezembro",
+  "day": 7,
+  "fmt": "stories",
+  "status": "postado",
+  "animar": false,
+  "frames": 0,
+  "vertical": true,
+  "title": "Stories de 07",
+  "legenda": "",
+  "insight": "",
+  "textos": "",
+  "refs": "",
+  "imgs": [],
+  "sp": [],
+  "vids": [
+   "1-GKkvS7_KiBSIjNW1CKBNKO4DvceRhec"
+  ],
+  "files": []
+ }
+]
