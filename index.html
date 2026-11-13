@@ -1,3 +1,4 @@
+<meta charset="utf-8">
 <title>Cronogramas Everest</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500&display=swap">
@@ -9,6 +10,7 @@
   --border:#E4E4E7; --primary:#18181B; --primary-foreground:#FAFAFA; --ring:#A1A1AA;
   --ok:#10B981; --wait:#F59E0B; --fix:#EF4444; --hold:#A1A1AA; --done:#3B82F6; --anim:#8B5CF6;
   --radius:.5rem;
+  --ease-out:cubic-bezier(.23,1,.32,1); --ease-in-out:cubic-bezier(.77,0,.175,1); --ease-drawer:cubic-bezier(.32,.72,0,1);
   --font:"Avenir","Avenir Next","Avenir LT Std","Nunito Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
   --shadow:0 10px 38px rgba(9,9,11,.14);
 }
@@ -147,19 +149,70 @@ main.wrap{padding-block:20px 56px;display:flex;flex-direction:column;gap:16px}
 @media (prefers-reduced-motion:no-preference){.drawer{animation:in .18s ease-out}@keyframes in{from{transform:translateX(24px);opacity:.6}}}
 
 
-/* ---------- visão macro: canvas de meses, interface em texto nos quatro cantos ---------- */
+/* ---------- tela inicial: mural com todos os posts, mês a mês ---------- */
 html.home,html.home body{height:100%;overflow:hidden;overscroll-behavior:none}
-.board{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
-.mlist{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
-.mlist:focus-within{position:fixed;z-index:4;left:50%;top:calc(12px + env(safe-area-inset-top,0px));transform:translateX(-50%);width:auto;height:auto;clip-path:none;background:var(--background);padding:4px 10px;display:flex;gap:12px}
+.board{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none;overflow:hidden}
 .board.drag{cursor:grabbing}
-.corner{position:fixed;z-index:3;background:var(--background);padding:4px 8px;font-size:14px;display:flex;align-items:center;gap:12px}
-.corner.tl{top:calc(12px + env(safe-area-inset-top,0px));left:calc(10px + env(safe-area-inset-left,0px))}
-.corner.tr{top:calc(12px + env(safe-area-inset-top,0px));right:calc(10px + env(safe-area-inset-right,0px))}
-.corner.bl{bottom:calc(12px + env(safe-area-inset-bottom,0px));left:calc(10px + env(safe-area-inset-left,0px));color:var(--muted-foreground);font-size:13px}
-.corner.br{bottom:calc(12px + env(safe-area-inset-bottom,0px));right:calc(10px + env(safe-area-inset-right,0px));font-variant-numeric:tabular-nums}
+.world{position:absolute;left:0;top:0;transform-origin:0 0;display:grid;gap:120px;padding:140px 120px;align-items:start}
+.world.moving{will-change:transform}
+.world.moving .tile{pointer-events:none}
+.month{box-sizing:border-box;width:var(--cw,1300px);min-width:0;background:var(--muted);border-radius:56px;padding:56px 60px 64px;display:flex;flex-direction:column;gap:40px}
+.month.now{box-shadow:0 0 0 6px var(--foreground)}
+.mhead{all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-template-columns:minmax(0,1fr);gap:18px;border-radius:28px;margin:-16px -20px 0;padding:16px 20px}
+.mhead:focus-visible{outline:6px solid var(--ring);outline-offset:4px}
+.meyebrow{grid-column:1/-1;display:flex;align-items:center;gap:18px;font-size:34px;color:var(--muted-foreground);font-variant-numeric:tabular-nums;margin-bottom:-6px}
+.nowtag{font-size:28px;font-weight:500;background:var(--foreground);color:var(--background);border-radius:999px;padding:4px 18px}
+.mname{font-size:150px;font-weight:500;letter-spacing:-.045em;line-height:.95;min-width:0;white-space:nowrap}
+.mgo{margin-left:auto;color:var(--muted-foreground);white-space:nowrap;display:flex;align-items:center;gap:12px}
+.mgo i{font-style:normal;display:inline-block;transition:transform 200ms var(--ease-out)}
+.mstats{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:12px 36px;font-size:34px;color:var(--muted-foreground);font-variant-numeric:tabular-nums}
+.mstats span{display:inline-flex;align-items:center;gap:12px}
+.mstats .dot{width:18px;height:18px}
+.mstats b{font-weight:500;color:var(--foreground)}
+.mbar{grid-column:1/-1;display:flex;height:12px;gap:6px;border-radius:6px;overflow:hidden}
+.mbar span{display:block;min-width:6px;border-radius:6px;background:var(--c)}
+.mbar .s-none{background:var(--border)}
+.mgrid{display:flex;flex-wrap:wrap;gap:36px 26px;align-items:flex-start}
+.mempty{font-size:36px;color:var(--muted-foreground);padding:40px 0}
+.post{display:flex;flex-direction:column;gap:12px;flex:none;max-width:100%}
+.post .pd{display:flex;align-items:center;gap:10px;font-size:26px;line-height:1;color:var(--muted-foreground);font-variant-numeric:tabular-nums;white-space:nowrap;height:26px}
+.post .pd b{font-weight:500;color:var(--foreground)}
+.post .pd .dot{width:14px;height:14px}
+.post .pd .cmt{margin-left:auto;background:var(--foreground);color:var(--background);border-radius:999px;padding:3px 12px;font-size:22px}
+.pieces{display:flex;flex-wrap:wrap;gap:8px}
+.tile{all:unset;box-sizing:border-box;position:relative;display:block;height:200px;border-radius:12px;overflow:hidden;cursor:pointer;flex:none;background:var(--border);background-repeat:no-repeat;transition:transform 160ms var(--ease-out)}
+.tile img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
+.tile::after{content:"";position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 0 0 1px rgba(0,0,0,.06);pointer-events:none}
+.tile.ph{width:150px;background:var(--background);padding:18px;font-size:22px;line-height:1.3;color:var(--muted-foreground);display:flex;flex-direction:column;justify-content:space-between}
+.tile.ph b{font-weight:500;color:var(--foreground)}
+.tile:focus-visible{outline:5px solid var(--ring);outline-offset:4px}
+.tile:active{transform:scale(.97)}
+@media (hover:hover) and (pointer:fine){
+  .tile:hover::after{box-shadow:inset 0 0 0 4px var(--foreground)}
+  .mhead:hover{background:color-mix(in srgb,var(--foreground) 5%,transparent)}
+  .mhead:hover .mgo{color:var(--foreground)}
+  .mhead:hover .mgo i{transform:translateX(8px)}
+}
+/* interface por cima do mural, em material translúcido */
+.corner{position:fixed;z-index:3;display:flex;align-items:center;gap:14px;font-size:14px;padding:7px 14px;border-radius:999px;
+  background:color-mix(in srgb,var(--background) 78%,transparent);-webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%);
+  box-shadow:0 0 0 1px color-mix(in srgb,var(--foreground) 8%,transparent),0 4px 16px rgba(0,0,0,.06)}
+.corner.tl{top:calc(12px + env(safe-area-inset-top,0px));left:calc(12px + env(safe-area-inset-left,0px))}
+.corner.tr{top:calc(12px + env(safe-area-inset-top,0px));right:calc(12px + env(safe-area-inset-right,0px))}
+.corner.bl{bottom:calc(12px + env(safe-area-inset-bottom,0px));left:calc(12px + env(safe-area-inset-left,0px));color:var(--muted-foreground);font-size:13px}
+.corner.br{bottom:calc(12px + env(safe-area-inset-bottom,0px));right:calc(12px + env(safe-area-inset-right,0px));font-variant-numeric:tabular-nums}
+.corner.bc{bottom:calc(12px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);padding:4px;gap:2px;max-width:calc(100% - 24px);overflow-x:auto;scrollbar-width:none}
+.corner.bc::-webkit-scrollbar{display:none}
+.corner.bc button{all:unset;cursor:pointer;padding:5px 11px;border-radius:999px;color:var(--muted-foreground);font-size:13px;white-space:nowrap;transition:transform 160ms var(--ease-out)}
+.corner.bc button.now{color:var(--foreground);font-weight:500}
+.corner.bc button:active{transform:scale(.95)}
+.corner.bc button:focus-visible{outline:2px solid var(--ring)}
 .corner b{font-weight:500}.corner .mut{color:var(--muted-foreground)}
-@media (max-width:640px){.corner.tc{top:calc(46px + env(safe-area-inset-top,0px))}.corner.bl,.corner.tl .mut{display:none}.mebar .me span.nm{display:none}}
+.corner .tbtn{min-width:20px;justify-content:center}
+@media (hover:hover) and (pointer:fine){.corner.bc button:hover{color:var(--foreground);background:color-mix(in srgb,var(--foreground) 6%,transparent)}}
+@media (prefers-reduced-transparency:reduce){.corner{background:var(--background);-webkit-backdrop-filter:none;backdrop-filter:none}}
+@media (max-width:1100px){.corner.bl{display:none}}
+@media (max-width:640px){.corner.tl .mut,.corner.br,.mebar .me span.nm{display:none}.corner.tr{gap:10px}}
 
 /* ---------- barra de perfil ---------- */
 .mebar{display:flex;align-items:center;gap:14px;font-size:13px}
@@ -198,18 +251,6 @@ html.home,html.home body{height:100%;overflow:hidden;overscroll-behavior:none}
 .frame.dv:hover .play{background:rgba(0,0,0,.85)}
 .sl-r .frame.dv{cursor:pointer}
 .frame .spr{position:absolute;inset:0;background-repeat:no-repeat}
-.corner.tc{top:calc(8px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);padding:0}
-.board.drag{cursor:grabbing}
-.world{position:absolute;left:0;top:0;transform-origin:0 0;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:200px 170px;padding:120px;width:5520px;will-change:transform}
-.cluster{all:unset;box-sizing:border-box;position:relative;display:block;cursor:pointer;flex:none}
-.cluster .thumbs{display:flex;flex-wrap:wrap;gap:10px;width:1180px;align-items:flex-start;justify-content:center;min-height:300px}
-.cluster .thumbs img{height:150px;object-fit:cover;max-width:none;display:block;border-radius:3px;pointer-events:none}
-.cluster .thumbs .tsp{display:block;height:150px;border-radius:3px;background-repeat:no-repeat;flex:none}
-.mlabel{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:210px;font-weight:500;letter-spacing:-.04em;line-height:1;white-space:nowrap;color:var(--foreground);-webkit-text-stroke:14px var(--background);paint-order:stroke fill}
-.mlabel sup{font-size:.26em;font-weight:400;color:var(--muted-foreground);letter-spacing:0;margin-left:10px;vertical-align:top;position:relative;top:.35em;-webkit-text-stroke:8px var(--background);paint-order:stroke fill}
-.msub{position:absolute;left:50%;top:calc(50% + 135px);transform:translateX(-50%);white-space:nowrap;font-size:34px;background:var(--background);padding:4px 16px;color:var(--muted-foreground)}
-.cluster:hover .mlabel{text-decoration:underline;text-decoration-thickness:8px;text-underline-offset:18px}
-.cluster:focus-visible{outline:6px solid var(--ring);outline-offset:30px}
 .row span.th{background-repeat:no-repeat;display:block}
 .frame .rm{all:unset;cursor:pointer;position:absolute;top:6px;right:6px;width:22px;height:22px;border-radius:50%;background:var(--background);border:1px solid var(--border);display:grid;place-items:center;font-size:13px;color:var(--foreground)}
 .frame .vtag{position:absolute;top:6px;left:6px;background:var(--background);border:1px solid var(--border);border-radius:4px;padding:0 6px;font-size:11px;color:var(--foreground)}
@@ -259,9 +300,7 @@ let db = null, user = null, assets = null, local = false;
 let me = {id:null, name:'', avatar:'', canEdit:false};
 const S = {state:{}, comments:{}, members:{}, notifs:{}};
 const profiles = {}, asked = new Set();
-const ui = {month:null, home:'mural', view:'cal', fStatus:null, fAnim:false, open:null, pin:null, panel:null, mentions:[], busy:false};
-const view = {x:0, y:0, k:1, fitted:false};
-try { if (localStorage.getItem('cron-home') === 'graph') ui.home = 'graph'; } catch(e){}
+const ui = {month:null, view:'cal', fStatus:null, fAnim:false, open:null, pin:null, panel:null, mentions:[], busy:false};
 try { const v = localStorage.getItem('cron-view2'); if (['slides','cal','list'].includes(v)) ui.view = v; } catch(e){}
 
 /* ---------- utilidades ---------- */
@@ -344,155 +383,208 @@ function meBar(){
     h('span', {class:'me'}, me.avatar && h('img', {class:'av', src:me.avatar, alt:''}), h('span', {class:'nm', text:me.name || 'Você'}), h('span', {class:'tag', text:ROLE[roleOf(me.id)]})));
 }
 
-/* ---------- visão geral: grafo de meses e posts ---------- */
-// Meses em círculo; cada post é um ponto ligado ao seu mês. Desenhado em canvas, com arrastar e zoom.
-const RING = 600, pan = {ptr:new Map(), moved:false, d0:0};
-let G = null, hov = null, cv = null;
-function buildGraph(){
-  const nodes = [];
-  MONTHS.forEach((m, i) => {
-    const a = -Math.PI / 2 + i / MONTHS.length * 2 * Math.PI, hx = Math.cos(a) * RING, hy = Math.sin(a) * RING;
-    const ps = POSTS.filter(p => p.month === m.k).sort((x, y) => (x.day || 99) - (y.day || 99));
-    const hub = {isHub:true, m, x:hx, y:hy, r:5 + Math.sqrt(ps.length) * .8, n:ps.length, a};
-    nodes.push(hub);
-    ps.forEach((p, j) => {
-      const rnd = s => { const v = Math.sin((i * 131 + j * 71 + s) * 12.9898) * 43758.5453; return v - Math.floor(v); }; // variação fixa, para o desenho não mudar a cada abertura
-      const t = j * 2.39996 + i * 1.7 + (rnd(1) - .5) * .5, d = (34 + 20 * Math.sqrt(j + 1)) * (.82 + rnd(2) * .4), pcs = (p.imgs || []).length + (p.sp || []).length + (p.vids || []).length;
-      nodes.push({p, hub, x:hx + Math.cos(t) * d, y:hy + Math.sin(t) * d, r:2 + Math.min(pcs, 10) * .22});
-    });
-  });
-  return nodes;
-}
-const ALPHA = {em_aprovacao:1, ajuste:1, aprovado:.8, insumos:.5, postado:.38, none:.24};
 let homeSig = '';
-const homeSeg = () => h('div', {class:'seg', role:'group', 'aria-label':'Visão geral'}, [['mural','Mural'],['graph','Grafo']].map(([k, n]) =>
-  h('button', {'aria-pressed':String(ui.home === k), onclick:() => { ui.home = k; try { localStorage.setItem('cron-home', k); } catch(e){} scrollTo(0, 0); render(true); }, text:n})));
-// Mural: todas as peças de cada mês num canvas navegável; clicar num mês abre o cronograma dele.
-const mv = {x:0, y:0, k:1, fitted:false}, mpan = {ptr:new Map(), moved:false, d0:0};
-function applyMural(){ const w = $('#world'); if (!w) return; w.style.transform = `translate(${mv.x}px,${mv.y}px) scale(${mv.k})`; const z = $('#zoom'); if (z) z.textContent = Math.round(mv.k * 100) + '%'; }
-function fitMural(){ const w = $('#world'); if (!w) return; mv.k = Math.min(innerWidth / w.offsetWidth, (innerHeight - 70) / w.offsetHeight, 1); mv.x = (innerWidth - w.offsetWidth * mv.k) / 2; mv.y = (innerHeight - w.offsetHeight * mv.k) / 2 + 10; mv.fitted = true; applyMural(); }
-function zoomMural(cx, cy, f){ const k = Math.min(3, Math.max(.05, mv.k * f)), r = k / mv.k; mv.x = cx - (cx - mv.x) * r; mv.y = cy - (cy - mv.y) * r; mv.k = k; applyMural(); }
+// Mural: todos os posts de cada mês num canvas navegável. Clicar num post abre a gaveta dele; clicar no nome do mês abre o cronograma.
+const mv = {x:0, y:0, k:1, fitted:false, back:null, cols:0}, mpan = {ptr:new Map(), moved:false, d0:0, hist:[], rx:0, ry:0, start:null};
+const NOW = new Date(), NOWK = NOW.getFullYear() === YEAR ? (MONTHS.find(m => m.num === NOW.getMonth() + 1) || {}).k : null;
+const reducedMotion = () => { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch(e) { return false; } };
+let camRaf = 0, restT = 0;
+function stopCam(){ if (camRaf) cancelAnimationFrame(camRaf); camRaf = 0; }
+function moving(on){
+  const w = $('#world'); if (!w) return;
+  clearTimeout(restT);
+  if (on) w.classList.add('moving'); else restT = setTimeout(() => w.classList.remove('moving'), 120); // sem will-change em repouso, o texto volta a ficar nítido
+}
+function applyMural(){ const w = $('#world'); if (!w) return; w.style.transform = `translate3d(${mv.x}px,${mv.y}px,0) scale(${mv.k})`; const z = $('#zoom'); if (z) z.textContent = Math.round(mv.k * 100) + '%'; }
+const worldSize = () => { const w = $('#world'); return w ? [w.offsetWidth, w.offsetHeight] : [1, 1]; };
+// Limites suaves: o mural pode passar um pouco da borda, com resistência crescente, e volta ao soltar.
+function bounds(k){
+  const [W0, H0] = worldSize(), W = W0 * k, H = H0 * k, vw = innerWidth, vh = innerHeight, sx = vw * .25, sy = vh * .25;
+  const ax = W <= vw ? [(vw - W) / 2 - sx, (vw - W) / 2 + sx] : [vw - W - sx, sx];
+  const ay = H <= vh ? [(vh - H) / 2 - sy, (vh - H) / 2 + sy] : [vh - H - sy, sy];
+  return {x:ax, y:ay};
+}
+const rubber = (o, d) => (o * d * .55) / (d + .55 * o);
+const band = (v, [lo, hi], d) => v < lo ? lo - rubber(lo - v, d) : v > hi ? hi + rubber(v - hi, d) : v;
+const clampTo = (v, [lo, hi]) => Math.min(hi, Math.max(lo, v));
+// Câmera: anima o centro da tela (em coordenadas do mural) e o zoom em escala logarítmica, sempre a partir da posição atual.
+function camTo(x, y, k, dur, done){
+  stopCam();
+  if (reducedMotion() || !dur) { mv.x = x; mv.y = y; mv.k = k; applyMural(); moving(false); if (done) done(); return; }
+  const cx0 = (innerWidth / 2 - mv.x) / mv.k, cy0 = (innerHeight / 2 - mv.y) / mv.k, k0 = mv.k;
+  const cx1 = (innerWidth / 2 - x) / k, cy1 = (innerHeight / 2 - y) / k, t0 = performance.now();
+  const ease = t => 1 - Math.pow(1 - t, 4);
+  moving(true);
+  const step = now => {
+    const t = Math.min(1, (now - t0) / dur), e = ease(t);
+    mv.k = k0 * Math.pow(k / k0, e);
+    mv.x = innerWidth / 2 - (cx0 + (cx1 - cx0) * e) * mv.k; mv.y = innerHeight / 2 - (cy0 + (cy1 - cy0) * e) * mv.k;
+    applyMural();
+    if (t < 1) camRaf = requestAnimationFrame(step); else { camRaf = 0; mv.x = x; mv.y = y; mv.k = k; applyMural(); moving(false); if (done) done(); }
+  };
+  camRaf = requestAnimationFrame(step);
+}
+function settleIn(dur){ const b = bounds(mv.k), x = clampTo(mv.x, b.x), y = clampTo(mv.y, b.y); if (x !== mv.x || y !== mv.y) camTo(x, y, mv.k, dur || 420); else moving(false); }
+// Ao soltar, o mural continua na velocidade do gesto e desacelera como a rolagem do sistema.
+function glide(vx, vy){
+  stopCam();
+  if (reducedMotion() || Math.hypot(vx, vy) < .05) return settleIn();
+  let last = performance.now();
+  moving(true);
+  const step = now => {
+    const dt = Math.min(32, now - last); last = now;
+    const b = bounds(mv.k);
+    mv.x += vx * dt; mv.y += vy * dt;
+    const f = Math.pow(.998, dt);
+    vx *= (mv.x < b.x[0] || mv.x > b.x[1]) ? Math.pow(.98, dt) : f; // fora da borda, freia rápido
+    vy *= (mv.y < b.y[0] || mv.y > b.y[1]) ? Math.pow(.98, dt) : f;
+    applyMural();
+    if (Math.hypot(vx, vy) > .02) camRaf = requestAnimationFrame(step); else { camRaf = 0; settleIn(); }
+  };
+  camRaf = requestAnimationFrame(step);
+}
+function zoomMural(cx, cy, f, animate){
+  const [W0] = worldSize(), kmin = Math.min(.05, innerWidth / W0 * .5), k = Math.min(3, Math.max(kmin, mv.k * f)), r = k / mv.k;
+  const x = cx - (cx - mv.x) * r, y = cy - (cy - mv.y) * r;
+  if (animate) camTo(x, y, k, 260); else { stopCam(); mv.x = x; mv.y = y; mv.k = k; applyMural(); }
+}
+const columns = () => innerWidth >= 1100 ? 4 : innerWidth >= 700 ? 2 : 1;
+// Enquadramento inicial: no computador, o ano inteiro; em telas estreitas, a largura de uma coluna, começando no mês atual.
+function fitTarget(){
+  const [W, H] = worldSize(), vw = innerWidth, vh = innerHeight;
+  if (mv.cols >= 4) { const k = Math.min(vw / W, (vh - 110) / H, 1); return [(vw - W * k) / 2, (vh - H * k) / 2 + 4, k]; }
+  const k = Math.min(vw / W, 1), m = $(`.month[data-k="${NOWK}"]`), top = m ? m.offsetTop - 40 : 0;
+  return [(vw - W * k) / 2, 64 - top * k, k];
+}
+function fitMural(animate){ const [x, y, k] = fitTarget(); mv.fitted = true; camTo(x, y, k, animate ? 480 : 0); }
+function monthTarget(el, tight){
+  const vw = innerWidth, vh = innerHeight, cw = el.offsetWidth, ch = el.offsetHeight;
+  let k = mv.cols >= 4 && !tight ? Math.min((vw - 80) / cw, (vh - 150) / ch) : (vw - 24) / cw;
+  if (tight) k = Math.min((vw - 40) / cw, 1.1);
+  const x = vw / 2 - (el.offsetLeft + cw / 2) * k;
+  const y = (mv.cols >= 4 && !tight && ch * k < vh - 150) ? vh / 2 - (el.offsetTop + ch / 2) * k : 70 - el.offsetTop * k;
+  return [x, y, k];
+}
+function goMonth(k){ const el = $(`.month[data-k="${k}"]`); if (!el) return; const [x, y, kk] = monthTarget(el); camTo(x, y, kk, 520); }
+// Abrir o cronograma: a câmera entra no mês e só então a página do mês aparece; ao voltar, faz o caminho inverso.
+function openMonth(k){
+  const el = $(`.month[data-k="${k}"]`);
+  mv.back = {x:mv.x, y:mv.y, k:mv.k};
+  if (!el || reducedMotion()) return enter(k);
+  const [x, y, kk] = monthTarget(el, true);
+  camTo(x, y, kk, 340, () => enter(k));
+}
+function tileFor(p, f){
+  const label = `${dateLabel(p)} · ${FMT[p.fmt]} · ${p.title}`;
+  const click = e => { if (mpan.moved) { e.preventDefault(); return; } openPost(p.id); };
+  if (f.sp) return h('button', {class:'tile', 'aria-label':label, style:`width:${Math.round(200 * f.sp[3] / f.sp[4])}px;${sprite(f.month, f.sp)}`, onclick:click});
+  return h('button', {class:'tile', 'aria-label':label, style:`width:${p.vertical ? 113 : 160}px`, onclick:click}, h('img', {src:f.src, alt:'', draggable:'false', loading:'lazy', decoding:'async'}));
+}
 function renderMural(){
-  const stats = MONTHS.map(m => { const ps = POSTS.filter(p => p.month === m.k), c = s => ps.filter(p => statusOf(p) === s).length; return [c('aprovado') + c('postado'), c('em_aprovacao') + c('ajuste'), ps.reduce((n, p) => n + openCount(p), 0)]; });
-  const sig = JSON.stringify(['m', stats, unread(), me.name, roleOf(me.id), local]);
+  const byMonth = MONTHS.map(m => POSTS.filter(p => p.month === m.k).sort((a, b) => (a.day || 99) - (b.day || 99)));
+  const sig = JSON.stringify(['m', byMonth.map(ps => ps.map(p => [statusOf(p), openCount(p)])), unread(), me.name, roleOf(me.id), local, columns()]);
   const app = $('#app');
   if (sig === homeSig && app.dataset.v === 'mural') return;
   homeSig = sig; app.dataset.v = 'mural';
-  const world = h('div', {class:'world', id:'world'}, MONTHS.map((m, i) => {
-    const ps = POSTS.filter(p => p.month === m.k), st = stats[i];
-    const pieces = ps.flatMap(p => framesOf(p).filter(f => f.kind === 'image' || (f.kind === 'sprite' && f.sp[3] / f.sp[4] < 1.25) || (f.kind === 'dvideo' && (f.src || f.sp))).map(f =>
-      f.sp ? h('span', {class:'tsp', style:`width:${Math.round(150 * f.sp[3] / f.sp[4])}px;${sprite(f.month, f.sp)}`}) : h('img', {src:f.src, alt:'', draggable:'false', loading:'lazy', style:`width:${p.vertical ? 84 : 120}px`})));
-    return h('button', {class:'cluster' + (ps.length ? '' : ' empty'), 'aria-label':`Abrir ${m.n}`, onclick:() => { if (!mpan.moved) enter(m.k); }},
-      h('div', {class:'thumbs'}, pieces),
-      h('div', {class:'mlabel'}, m.n, ps.length ? h('sup', {text:ps.length}) : null),
-      h('div', {class:'msub', text:ps.length ? `${st[0]} aprovados ou postados · ${st[1]} em aprovação ou ajuste · ${st[2]} comentários abertos` : 'Ainda sem posts'}));
+  const cols = columns(), relayout = cols !== mv.cols; mv.cols = cols;
+  const world = h('div', {class:'world', id:'world', style:`grid-template-columns:repeat(${cols},var(--cw))`}, MONTHS.map((m, i) => {
+    const ps = byMonth[i], counts = {}; ORDER.forEach(k => counts[k] = 0); ps.forEach(p => counts[statusOf(p)]++);
+    const open = ps.reduce((n, p) => n + openCount(p), 0);
+    const head = h('button', {class:'mhead', 'aria-label':`Abrir o cronograma de ${m.n}`, onclick:e => { if (mpan.moved) return e.preventDefault(); openMonth(m.k); }},
+      h('span', {class:'meyebrow'}, m.k === NOWK && h('span', {class:'nowtag', text:'Mês atual'}), h('span', {text:ps.length ? `2026 · ${ps.length} posts` : '2026'}),
+        h('span', {class:'mgo'}, 'Abrir cronograma', h('i', {'aria-hidden':'true', text:'→'}))),
+      h('span', {class:'mname', text:m.n}),
+      ps.length ? h('span', {class:'mstats'}, ORDER.filter(k => counts[k] && k !== 'none').map(k => h('span', {class:'s-' + k}, h('span', {class:'dot'}), h('b', {text:counts[k]}), ST[k])),
+        open ? h('span', null, h('b', {text:open}), open > 1 ? 'comentários abertos' : 'comentário aberto') : null) : null,
+      ps.length ? h('span', {class:'mbar', 'aria-hidden':'true'}, ORDER.map(k => counts[k] ? h('span', {class:'s-' + k, style:`flex:${counts[k]}`}) : null)) : null);
+    const grid = ps.length ? h('div', {class:'mgrid'}, ps.map(p => {
+      const fr = framesOf(p).filter(f => f.kind === 'image' || (f.kind === 'sprite' && f.sp[3] / f.sp[4] < 1.25) || (f.kind === 'dvideo' && (f.src || f.sp))), n = openCount(p), s = statusOf(p);
+      return h('div', {class:'post s-' + s},
+        h('div', {class:'pd', title:ST[s]}, h('span', {class:'dot'}), h('b', {text:p.day ? String(p.day).padStart(2, '0') : '—'}), FMT[p.fmt], n > 0 && h('span', {class:'cmt', title:`${n} comentário${n > 1 ? 's' : ''} em aberto`, text:n})),
+        h('div', {class:'pieces'}, fr.length ? fr.map(f => tileFor(p, f))
+          : h('button', {class:'tile ph', 'aria-label':`${dateLabel(p)} · ${FMT[p.fmt]} · ${p.title}`, onclick:e => { if (mpan.moved) return e.preventDefault(); openPost(p.id); }}, h('b', {text:FMT[p.fmt]}), h('span', {text:p.title.length > 54 ? p.title.slice(0, 52) + '…' : p.title}))));
+    })) : h('div', {class:'mempty', text:'Ainda sem posts.'});
+    return h('section', {class:'month' + (m.k === NOWK ? ' now' : ''), 'data-k':m.k, 'aria-label':m.n}, head, grid);
   }));
   const board = h('div', {class:'board', id:'mural'}, world);
   app.replaceChildren(board,
     h('div', {class:'corner tl'}, h('b', {text:'Everest'}), h('span', {class:'mut', text:'Cronogramas 2026'})),
     h('div', {class:'corner tr'}, meBar()),
-    h('div', {class:'corner tc'}, homeSeg()),
-    h('div', {class:'corner bl', text:local ? 'Modo demonstração: nada é salvo fora deste navegador' : 'Arraste para navegar · role para dar zoom · clique em um mês para abrir'}),
-    h('div', {class:'corner br'}, h('button', {class:'tbtn', onclick:() => zoomMural(innerWidth / 2, innerHeight / 2, 1 / 1.3), 'aria-label':'Diminuir zoom', text:'−'}), h('span', {id:'zoom'}),
-      h('button', {class:'tbtn', onclick:() => zoomMural(innerWidth / 2, innerHeight / 2, 1.3), 'aria-label':'Aumentar zoom', text:'+'}), h('button', {class:'tbtn', onclick:fitMural, text:'Ajustar'})));
-  board.addEventListener('pointerdown', e => { mpan.ptr.set(e.pointerId, {x:e.clientX, y:e.clientY}); if (mpan.ptr.size === 1) mpan.moved = false; mpan.d0 = 0; board.classList.add('drag'); });
+    h('nav', {class:'corner bc', 'aria-label':'Ir para o mês'}, MONTHS.map(m => h('button', {class:m.k === NOWK ? 'now' : null, onclick:() => goMonth(m.k), text:m.n.slice(0, 3)}))),
+    h('div', {class:'corner bl', text:local ? 'Modo demonstração: nada é salvo fora deste navegador' : 'Arraste para navegar · pinça ou Ctrl + rolagem para zoom'}),
+    h('div', {class:'corner br'}, h('button', {class:'tbtn', onclick:() => zoomMural(innerWidth / 2, innerHeight / 2, 1 / 1.4, true), 'aria-label':'Diminuir zoom', text:'−'}), h('span', {id:'zoom'}),
+      h('button', {class:'tbtn', onclick:() => zoomMural(innerWidth / 2, innerHeight / 2, 1.4, true), 'aria-label':'Aumentar zoom', text:'+'}), h('button', {class:'tbtn', onclick:() => fitMural(true), text:'Ajustar'})));
+  bindMural(board);
+  sizeCards(world, cols);
+  if (!mv.fitted || relayout) fitMural(); else applyMural();
+}
+// Largura dos cartões dos meses: em telas largas, a que deixa o ano inteiro com a mesma proporção da janela;
+// em telas estreitas, uma coluna de leitura que se percorre arrastando.
+function sizeCards(world, cols){
+  if (cols < 4) { world.style.setProperty('--cw', (cols === 1 ? 900 : 1100) + 'px'); return; }
+  const target = innerWidth / Math.max(300, innerHeight - 110);
+  let lo = 900, hi = 5000;
+  for (let i = 0; i < 9; i++) {
+    const mid = (lo + hi) / 2; world.style.setProperty('--cw', mid + 'px');
+    if (world.offsetWidth / world.offsetHeight < target) lo = mid; else hi = mid;
+  }
+  world.style.setProperty('--cw', Math.round(lo) + 'px');
+}
+function bindMural(board){
+  board.addEventListener('pointerdown', e => {
+    if (e.button > 0) return;
+    stopCam();
+    mpan.ptr.set(e.pointerId, {x:e.clientX, y:e.clientY, x0:e.clientX, y0:e.clientY, type:e.pointerType});
+    if (mpan.ptr.size === 1) { mpan.moved = false; mpan.rx = mv.x; mpan.ry = mv.y; mpan.hist = [{x:e.clientX, y:e.clientY, t:e.timeStamp}]; }
+    mpan.d0 = 0;
+  });
   board.addEventListener('pointermove', e => {
     const p = mpan.ptr.get(e.pointerId); if (!p) return;
     const dx = e.clientX - p.x, dy = e.clientY - p.y;
-    if (mpan.ptr.size === 1) { if (Math.abs(dx) + Math.abs(dy) > 4) mpan.moved = true; if (mpan.moved) { mv.x += dx; mv.y += dy; applyMural(); p.x = e.clientX; p.y = e.clientY; } }
-    else { p.x = e.clientX; p.y = e.clientY; const [a, c] = [...mpan.ptr.values()], d = Math.hypot(a.x - c.x, a.y - c.y); if (mpan.d0) zoomMural((a.x + c.x) / 2, (a.y + c.y) / 2, d / mpan.d0); mpan.d0 = d; mpan.moved = true; }
-  });
-  const up = e => { mpan.ptr.delete(e.pointerId); mpan.d0 = 0; if (!mpan.ptr.size) board.classList.remove('drag'); };
-  board.addEventListener('pointerup', up); board.addEventListener('pointercancel', up); board.addEventListener('pointerleave', up);
-  board.addEventListener('wheel', e => { e.preventDefault(); zoomMural(e.clientX, e.clientY, Math.exp(-e.deltaY * (e.ctrlKey ? .01 : .0018))); }, {passive:false});
-  if (!mv.fitted) fitMural(); else applyMural();
-}
-function renderHome(){
-  if (ui.home === 'mural') return renderMural();
-  const sig = JSON.stringify([unread(), me.name, roleOf(me.id), local]);
-  const app = $('#app');
-  if (sig !== homeSig || app.dataset.v !== 'home') {
-    homeSig = sig; app.dataset.v = 'home';
-    G = G || buildGraph();
-    cv = h('canvas', {class:'board', id:'board', 'aria-label':'Grafo dos cronogramas: cada ponto é um post, ligado ao seu mês'});
-    app.replaceChildren(cv,
-      h('div', {class:'corner tl'}, h('b', {text:'Everest'}), h('span', {class:'mut', text:'Cronogramas 2026'})),
-      h('div', {class:'corner tr'}, meBar()),
-      h('div', {class:'corner bl', id:'hint', text:local ? 'Modo demonstração: nada é salvo fora deste navegador' : 'Cada ponto é um post · clique em um mês ou em um post para abrir'}),
-      h('div', {class:'corner br'}, h('button', {class:'tbtn', onclick:() => zoomAt(innerWidth / 2, innerHeight / 2, 1 / 1.3), 'aria-label':'Diminuir zoom', text:'−'}), h('span', {id:'zoom'}),
-        h('button', {class:'tbtn', onclick:() => zoomAt(innerWidth / 2, innerHeight / 2, 1.3), 'aria-label':'Aumentar zoom', text:'+'}), h('button', {class:'tbtn', onclick:fit, text:'Ajustar'})),
-      h('div', {class:'corner tc'}, homeSeg()),
-      h('nav', {class:'mlist', 'aria-label':'Meses'}, MONTHS.map(m => h('button', {class:'tbtn', onclick:() => enter(m.k), text:m.n}))));
-    bindBoard(cv); sizeCanvas();
-    if (!view.fitted) fit();
-  }
-  draw();
-}
-function sizeCanvas(){ if (!cv) return; const d = devicePixelRatio || 1; cv.width = innerWidth * d; cv.height = innerHeight * d; }
-function fit(){ view.k = Math.min(innerWidth - 170, innerHeight - 110) / (2 * (RING + 250)); view.x = innerWidth / 2; view.y = innerHeight / 2 + 6; view.fitted = true; draw(); }
-function zoomAt(cx, cy, f){ const k = Math.min(6, Math.max(.12, view.k * f)), r = k / view.k; view.x = cx - (cx - view.x) * r; view.y = cy - (cy - view.y) * r; view.k = k; draw(); }
-let drawQ = 0;
-function draw(){ if (drawQ) return; drawQ = requestAnimationFrame(() => { drawQ = 0; paint(); }); }
-function paint(){
-  if (!cv || !cv.isConnected || !G) return;
-  const z = $('#zoom'); if (z) z.textContent = Math.round(view.k * 100) + '%';
-  const cs = getComputedStyle(document.documentElement), FG = cs.getPropertyValue('--foreground').trim(), BG = cs.getPropertyValue('--background').trim(), MUT = cs.getPropertyValue('--muted-foreground').trim();
-  const ctx = cv.getContext('2d'), d = devicePixelRatio || 1, k = view.k;
-  ctx.setTransform(d, 0, 0, d, 0, 0); ctx.fillStyle = BG; ctx.fillRect(0, 0, innerWidth, innerHeight);
-  ctx.translate(view.x, view.y); ctx.scale(k, k);
-  const focus = hov ? (hov.isHub ? hov : hov.hub) : null;
-  // ligações
-  ctx.strokeStyle = FG; ctx.lineWidth = 1 / k;
-  ctx.globalAlpha = .1; ctx.beginPath(); ctx.arc(0, 0, RING, 0, Math.PI * 2); ctx.stroke();
-  for (const n of G) { if (n.isHub) continue; ctx.globalAlpha = focus ? (n.hub === focus ? .45 : .05) : .16; ctx.beginPath(); ctx.moveTo(n.hub.x, n.hub.y); ctx.lineTo(n.x, n.y); ctx.stroke(); }
-  // pontos
-  ctx.fillStyle = FG;
-  for (const n of G) {
-    let a = 1, r = n.r;
-    if (!n.isHub) { a = ALPHA[statusOf(n.p)] || .3; if (openCount(n.p)) { r += 1.6; a = 1; } if (focus && n.hub !== focus) a *= .25; }
-    else if (focus && n !== focus) a = .35;
-    ctx.globalAlpha = a; ctx.beginPath(); ctx.arc(n.x, n.y, Math.max(r, 1.3 / k), 0, Math.PI * 2); ctx.fill();
-    if (n === hov) { ctx.globalAlpha = 1; ctx.lineWidth = 1.5 / k; ctx.beginPath(); ctx.arc(n.x, n.y, r + 4 / k, 0, Math.PI * 2); ctx.stroke(); ctx.lineWidth = 1 / k; }
-  }
-  // rótulos, em pixels de tela
-  ctx.setTransform(d, 0, 0, d, 0, 0); ctx.globalAlpha = 1; ctx.textBaseline = 'middle';
-  const font = getComputedStyle(document.body).fontFamily;
-  const label = (x, y, main, sub, align) => {
-    ctx.font = `500 13px ${font}`; const w1 = ctx.measureText(main).width; ctx.font = `400 12px ${font}`; const w2 = sub ? ctx.measureText(sub).width + 7 : 0, w = w1 + w2;
-    const x0 = Math.min(Math.max(align === 'right' ? x - w : align === 'center' ? x - w / 2 : x, 8), innerWidth - w - 8);
-    ctx.fillStyle = BG; ctx.fillRect(x0 - 5, y - 11, w + 10, 22);
-    ctx.textAlign = 'left'; ctx.font = `500 13px ${font}`; ctx.fillStyle = FG; ctx.fillText(main, x0, y + .5);
-    if (sub) { ctx.font = `400 12px ${font}`; ctx.fillStyle = MUT; ctx.fillText(sub, x0 + w1 + 7, y + .5); }
-  };
-  for (const n of G) if (n.isHub) {
-    const out = RING + 34 + 20 * Math.sqrt(n.n + 1) + 26 / k, sx = view.x + Math.cos(n.a) * out * k, sy = view.y + Math.sin(n.a) * out * k, c = Math.cos(n.a);
-    label(sx, sy, n.m.n, String(n.n), c > .3 ? 'left' : c < -.3 ? 'right' : 'center');
-  }
-  if (hov && !hov.isHub) { const p = hov.p; label(view.x + hov.x * k + 12, view.y + hov.y * k - 16, `${dateLabel(p)} · ${FMT[p.fmt]}`, `${p.title.slice(0, 46)}${p.title.length > 46 ? '…' : ''} · ${ST[statusOf(p)]}`, 'left'); }
-}
-function hit(cx, cy){
-  const x = (cx - view.x) / view.k, y = (cy - view.y) / view.k; let best = null, bd = Infinity;
-  for (const n of G) { const dd = Math.hypot(n.x - x, n.y - y) - n.r; if (dd < bd) { bd = dd; best = n; } }
-  return bd * view.k < 9 ? best : null;
-}
-function bindBoard(b){
-  b.addEventListener('pointerdown', e => { pan.ptr.set(e.pointerId, {x:e.clientX, y:e.clientY}); if (pan.ptr.size === 1) pan.moved = false; pan.d0 = 0; });
-  b.addEventListener('pointermove', e => {
-    const p = pan.ptr.get(e.pointerId);
-    if (!p) { const n = hit(e.clientX, e.clientY); if (n !== hov) { hov = n; b.style.cursor = n ? 'pointer' : 'grab'; draw(); } return; }
-    const dx = e.clientX - p.x, dy = e.clientY - p.y;
-    if (pan.ptr.size === 1) { if (Math.abs(dx) + Math.abs(dy) > 4) pan.moved = true; if (pan.moved) { view.x += dx; view.y += dy; b.style.cursor = 'grabbing'; draw(); p.x = e.clientX; p.y = e.clientY; } }
-    else { p.x = e.clientX; p.y = e.clientY; const [a, c] = [...pan.ptr.values()], dd = Math.hypot(a.x - c.x, a.y - c.y); if (pan.d0) zoomAt((a.x + c.x) / 2, (a.y + c.y) / 2, dd / pan.d0); pan.d0 = dd; pan.moved = true; }
+    if (mpan.ptr.size === 1) {
+      if (!mpan.moved && Math.hypot(e.clientX - p.x0, e.clientY - p.y0) > (p.type === 'mouse' ? 4 : 10)) { mpan.moved = true; board.classList.add('drag'); moving(true); try { board.setPointerCapture(e.pointerId); } catch(_){} }
+      if (mpan.moved) {
+        const b = bounds(mv.k); mpan.rx += dx; mpan.ry += dy;
+        mv.x = band(mpan.rx, b.x, innerWidth); mv.y = band(mpan.ry, b.y, innerHeight); applyMural();
+        mpan.hist.push({x:e.clientX, y:e.clientY, t:e.timeStamp}); while (mpan.hist.length > 2 && e.timeStamp - mpan.hist[0].t > 90) mpan.hist.shift();
+      }
+      p.x = e.clientX; p.y = e.clientY;
+    } else {
+      p.x = e.clientX; p.y = e.clientY;
+      const [a, c] = [...mpan.ptr.values()], d = Math.hypot(a.x - c.x, a.y - c.y);
+      if (mpan.d0) zoomMural((a.x + c.x) / 2, (a.y + c.y) / 2, d / mpan.d0);
+      mpan.d0 = d; mpan.moved = true; moving(true); mpan.rx = mv.x; mpan.ry = mv.y; mpan.hist = [];
+    }
   });
   const up = e => {
-    const had = pan.ptr.delete(e.pointerId); pan.d0 = 0; b.style.cursor = 'grab';
-    if (had && !pan.moved && e.type === 'pointerup') { const n = hit(e.clientX, e.clientY); if (n) { hov = null; if (n.isHub) enter(n.m.k); else { enter(n.p.month); openPost(n.p.id); } } }
+    if (!mpan.ptr.delete(e.pointerId)) return;
+    mpan.d0 = 0;
+    if (mpan.ptr.size) { const [q] = mpan.ptr.values(); q.x0 = q.x; q.y0 = q.y; mpan.rx = mv.x; mpan.ry = mv.y; return; } // de dois dedos para um: continua sem saltar
+    board.classList.remove('drag');
+    if (!mpan.moved) return;
+    const hs = mpan.hist, a = hs[0], b = hs[hs.length - 1], dt = b && a ? b.t - a.t : 0;
+    const stale = b ? e.timeStamp - b.t > 60 : true; // parou antes de soltar: sem inércia
+    if (dt > 0 && !stale) glide((b.x - a.x) / dt, (b.y - a.y) / dt); else settleIn();
+    setTimeout(() => { mpan.moved = false; }, 0);
   };
-  b.addEventListener('pointerup', up); b.addEventListener('pointercancel', up);
-  b.addEventListener('pointerleave', e => { if (!pan.ptr.has(e.pointerId) && hov) { hov = null; draw(); } });
-  b.addEventListener('wheel', e => { e.preventDefault(); zoomAt(e.clientX, e.clientY, Math.exp(-e.deltaY * (e.ctrlKey ? .01 : .0018))); }, {passive:false});
+  board.addEventListener('pointerup', up); board.addEventListener('pointercancel', up);
+  let wheelT = 0;
+  board.addEventListener('wheel', e => {
+    e.preventDefault(); stopCam(); moving(true);
+    const unit = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? innerHeight : 1;
+    if (e.ctrlKey || e.metaKey) zoomMural(e.clientX, e.clientY, Math.exp(-Math.max(-60, Math.min(60, e.deltaY * unit)) * .01));
+    else { const b = bounds(mv.k); mv.x = clampTo(mv.x - e.deltaX * unit, b.x); mv.y = clampTo(mv.y - e.deltaY * unit, b.y); applyMural(); }
+    clearTimeout(wheelT); wheelT = setTimeout(() => settleIn(), 140);
+  }, {passive:false});
+  // Navegação por teclado: o foco que cai fora da tela traz a câmera até ele.
+  board.addEventListener('focusin', e => {
+    if (mpan.ptr.size) return;
+    const r = e.target.getBoundingClientRect();
+    if (r.left >= 0 && r.top >= 60 && r.right <= innerWidth && r.bottom <= innerHeight - 60) return;
+    camTo(mv.x + innerWidth / 2 - (r.left + r.width / 2), mv.y + innerHeight / 2 - (r.top + r.height / 2), mv.k, 300);
+  });
 }
-try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', draw); new MutationObserver(draw).observe(document.documentElement, {attributes:true, attributeFilter:['data-theme']}); } catch(e){}
+const renderHome = () => renderMural();
 
 /* ---------- ambiente do mês ---------- */
 let mainSig = '';
@@ -725,11 +817,17 @@ function openPost(id){ ui.open = id; ui.panel = null; ui.pin = null; ui.mentions
 function closeOverlay(){ ui.open = null; ui.panel = null; ui.pin = null; ui.mentions = []; $('#overlay').replaceChildren(); drawerSig = ''; }
 
 /* ---------- navegação ---------- */
-function enter(k){ ui.month = k; ui.fStatus = null; ui.fAnim = false; try { location.hash = k; } catch(e){} render(); scrollTo(0, 0); }
-function goHome(){ ui.month = null; try { location.hash = ''; } catch(e){} render(); }
-addEventListener('hashchange', () => { const k = location.hash.slice(1), ok = MONTHS.some(m => m.k === k); if ((ok ? k : null) !== ui.month) { ui.month = ok ? k : null; closeOverlay(); render(); } });
+function arrive(sel){ // a página recém-aberta entra com um leve fade; com movimento reduzido, só o fade
+  const el = $(sel); if (!el || !el.animate) return;
+  el.animate(reducedMotion() ? [{opacity:0}, {opacity:1}] : [{opacity:0, transform:'scale(.985)'}, {opacity:1, transform:'none'}], {duration:240, easing:'cubic-bezier(.23,1,.32,1)'});
+}
+function enter(k){ ui.month = k; ui.fStatus = null; ui.fAnim = false; try { location.hash = k; } catch(e){} render(); scrollTo(0, 0); arrive('#app'); }
+function backHome(){ ui.month = null; render(); const b = mv.back; mv.back = null; if (b) camTo(b.x, b.y, b.k, 460); else arrive('#app'); }
+function goHome(){ try { location.hash = ''; } catch(e){} backHome(); }
+addEventListener('hashchange', () => { const k = location.hash.slice(1), ok = MONTHS.some(m => m.k === k); if ((ok ? k : null) !== ui.month) { closeOverlay(); if (ok) { ui.month = k; render(); arrive('#app'); } else backHome(); } });
 addEventListener('keydown', e => { if (e.key === 'Escape' && (ui.open || ui.panel)) closeOverlay(); });
-addEventListener('resize', () => { if (ui.month) return; if (ui.home === 'graph') { sizeCanvas(); fit(); } else fitMural(); });
+let resizeT = 0;
+addEventListener('resize', () => { if (ui.month) return; clearTimeout(resizeT); resizeT = setTimeout(() => { if (columns() !== mv.cols) render(true); else fitMural(); }, 120); });
 function render(f){
   document.documentElement.classList.toggle('home', !ui.month);
   if (f) { homeSig = ''; mainSig = ''; }
