@@ -30,7 +30,7 @@ tools/import_month.py     importa um deck do Google Slides para data/ e sp/
 
 ## Telas
 
-- **Cronogramas**: canvas navegável com um aglomerado por mês.
+- **Cronogramas**: grafo navegável (arrastar e zoom). Os meses ficam em círculo e cada post é um ponto ligado ao seu mês; o brilho do ponto indica o status e o tamanho, a quantidade de peças.
 - **Mês**: três visualizações do mesmo conteúdo: Slides (um slide por post), Calendário e Lista.
 - **Post**: gaveta lateral com criativo, arquivos finais do Drive, legenda, insight e comentários. Clicar numa peça fixa o comentário naquele ponto.
 - **Notificações** e **Pessoas**: avisos de `@` e perfis (Admin, Usuário, Cliente).
