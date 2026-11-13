@@ -253,9 +253,9 @@ let db = null, user = null, assets = null, local = false;
 let me = {id:null, name:'', avatar:'', canEdit:false};
 const S = {state:{}, comments:{}, members:{}, notifs:{}};
 const profiles = {}, asked = new Set();
-const ui = {month:null, view:'slides', fStatus:null, fAnim:false, open:null, pin:null, panel:null, mentions:[], busy:false};
+const ui = {month:null, view:'cal', fStatus:null, fAnim:false, open:null, pin:null, panel:null, mentions:[], busy:false};
 const view = {x:0, y:0, k:1, fitted:false};
-try { const v = localStorage.getItem('cron-view'); if (['slides','cal','list'].includes(v)) ui.view = v; } catch(e){}
+try { const v = localStorage.getItem('cron-view2'); if (['slides','cal','list'].includes(v)) ui.view = v; } catch(e){}
 
 /* ---------- utilidades ---------- */
 const $ = s => document.querySelector(s);
@@ -398,8 +398,8 @@ function renderMonth(){
   mainSig = sig; app.dataset.v = 'month';
   const counts = {}; ORDER.forEach(k => counts[k] = 0); let anim = 0;
   posts.forEach(p => { counts[statusOf(p)]++; if (animOf(p)) anim++; });
-  const seg = h('div', {class:'seg', id:'viewseg', role:'group', 'aria-label':'Visualização'}, [['slides','Slides'],['cal','Calendário'],['list','Lista']].map(([k, n]) =>
-    h('button', {'aria-pressed':String(ui.view === k), onclick:() => { ui.view = k; try { localStorage.setItem('cron-view', k); } catch(e){} render(); }, text:n})));
+  const seg = h('div', {class:'seg', id:'viewseg', role:'group', 'aria-label':'Visualização'}, [['cal','Calendário'],['slides','Slides'],['list','Lista']].map(([k, n]) =>
+    h('button', {'aria-pressed':String(ui.view === k), onclick:() => { ui.view = k; try { localStorage.setItem('cron-view2', k); } catch(e){} render(); }, text:n})));
   const chips = h('div', {class:'chips'}, ORDER.map(k => h('button', {class:'chip s-' + k, 'aria-pressed':String(ui.fStatus === k), onclick:() => { ui.fStatus = ui.fStatus === k ? null : k; render(); }}, h('span', {class:'dot'}), ST[k], h('b', {text:counts[k]}))),
     h('button', {class:'chip s-anim', 'aria-pressed':String(ui.fAnim), onclick:() => { ui.fAnim = !ui.fAnim; render(); }}, h('span', {class:'dot'}), 'A animar', h('b', {text:anim})));
   let body;
