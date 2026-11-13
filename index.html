@@ -193,6 +193,7 @@ html.home,html.home body{height:100%;overflow:hidden;overscroll-behavior:none}
 .tile::after{content:"";position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 0 0 1px rgba(0,0,0,.06);pointer-events:none}
 .tile.ph{width:150px;background:var(--background);padding:18px;font-size:22px;line-height:1.3;color:var(--muted-foreground);display:flex;flex-direction:column;justify-content:space-between}
 .tile.ph b{font-weight:500;color:var(--foreground)}
+.tile.ph span{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:4;overflow:hidden}
 .tile:focus-visible{outline:5px solid var(--ring);outline-offset:4px}
 .tile:active{transform:scale(.97)}
 @media (hover:hover) and (pointer:fine){
@@ -213,11 +214,12 @@ html.home,html.home body{height:100%;overflow:hidden;overscroll-behavior:none}
 .corner.bc::-webkit-scrollbar{display:none}
 .corner.bc button{all:unset;cursor:pointer;padding:5px 11px;border-radius:999px;color:var(--muted-foreground);font-size:13px;white-space:nowrap;transition:transform 160ms var(--ease-out)}
 .corner.bc button.now{color:var(--foreground);font-weight:500}
+.corner.bc button.here{background:var(--foreground);color:var(--background)}
 .corner.bc button:active{transform:scale(.95)}
 .corner.bc button:focus-visible{outline:2px solid var(--ring)}
 .corner b{font-weight:500}.corner .mut{color:var(--muted-foreground)}
 .corner .tbtn{min-width:20px;justify-content:center}
-@media (hover:hover) and (pointer:fine){.corner.bc button:hover{color:var(--foreground);background:color-mix(in srgb,var(--foreground) 6%,transparent)}}
+@media (hover:hover) and (pointer:fine){.corner.bc button:not(.here):hover{color:var(--foreground);background:color-mix(in srgb,var(--foreground) 6%,transparent)}}
 @media (prefers-reduced-transparency:reduce){.corner{background:var(--background);-webkit-backdrop-filter:none;backdrop-filter:none}}
 @media (max-width:1100px){.corner.bl{display:none}}
 @media (max-width:640px){.corner.tl .mut,.corner.br,.mebar .me span.nm{display:none}.corner.tr{gap:10px}}
@@ -403,7 +405,19 @@ function moving(on){
   clearTimeout(restT);
   if (on) w.classList.add('moving'); else restT = setTimeout(() => w.classList.remove('moving'), 120); // sem will-change em repouso, o texto volta a ficar nítido
 }
-function applyMural(){ const w = $('#world'); if (!w) return; w.style.transform = `translate3d(${mv.x}px,${mv.y}px,0) scale(${mv.k})`; const z = $('#zoom'); if (z) z.textContent = Math.round(mv.k * 100) + '%'; }
+function applyMural(){ const w = $('#world'); if (!w) return; w.style.transform = `translate3d(${mv.x}px,${mv.y}px,0) scale(${mv.k})`; const z = $('#zoom'); if (z) z.textContent = Math.round(mv.k * 100) + '%'; markHere(); }
+// Onde estou: com um mês ocupando boa parte da tela, ele fica destacado na barra de meses.
+let hereK = null;
+function markHere(){
+  let k = null;
+  if (mv.rects) {
+    const cx = (innerWidth / 2 - mv.x) / mv.k, cy = (innerHeight / 2 - mv.y) / mv.k;
+    const r = mv.rects.find(([, x, y, w, hh]) => cx >= x && cx <= x + w && cy >= y && cy <= y + hh);
+    if (r && r[3] * mv.k > innerWidth * .45) k = r[0];
+  }
+  if (k === hereK) return; hereK = k;
+  document.querySelectorAll('.corner.bc button').forEach(b => { const on = b.dataset.k === k; b.classList.toggle('here', on); if (on) b.setAttribute('aria-current', 'true'); else b.removeAttribute('aria-current'); });
+}
 const worldSize = () => { const w = $('#world'); return w ? [w.offsetWidth, w.offsetHeight] : [1, 1]; };
 // Limites suaves: o mural pode passar um pouco da borda, com resistência crescente, e volta ao soltar.
 function bounds(k){
@@ -518,12 +532,13 @@ function renderMural(){
   app.replaceChildren(board,
     h('div', {class:'corner tl'}, h('b', {text:'Everest'}), h('span', {class:'mut', text:'Cronogramas 2026'})),
     h('div', {class:'corner tr'}, meBar()),
-    h('nav', {class:'corner bc', 'aria-label':'Ir para o mês'}, MONTHS.map(m => h('button', {class:m.k === NOWK ? 'now' : null, onclick:() => goMonth(m.k), text:m.n.slice(0, 3)}))),
-    h('div', {class:'corner bl', text:local ? 'Modo demonstração: nada é salvo fora deste navegador' : 'Arraste para navegar · pinça ou Ctrl + rolagem para zoom'}),
+    h('nav', {class:'corner bc', 'aria-label':'Ir para o mês'}, MONTHS.map(m => h('button', {class:m.k === NOWK ? 'now' : null, 'data-k':m.k, 'aria-label':m.n, onclick:() => goMonth(m.k), text:m.n.slice(0, 3)}))),
+    h('div', {class:'corner bl', text:local ? 'Modo demonstração: nada é salvo fora deste navegador' : 'Arraste para navegar · pinça, Ctrl + rolagem ou clique duplo para zoom'}),
     h('div', {class:'corner br'}, h('button', {class:'tbtn', onclick:() => zoomMural(innerWidth / 2, innerHeight / 2, 1 / 1.4, true), 'aria-label':'Diminuir zoom', text:'−'}), h('span', {id:'zoom'}),
       h('button', {class:'tbtn', onclick:() => zoomMural(innerWidth / 2, innerHeight / 2, 1.4, true), 'aria-label':'Aumentar zoom', text:'+'}), h('button', {class:'tbtn', onclick:() => fitMural(true), text:'Ajustar'})));
   bindMural(board);
   sizeCards(world, cols);
+  mv.rects = [...world.children].map(el => [el.dataset.k, el.offsetLeft, el.offsetTop, el.offsetWidth, el.offsetHeight]); hereK = undefined;
   if (!mv.fitted || relayout) fitMural(); else applyMural();
 }
 // Largura dos cartões dos meses: em telas largas, a que deixa o ano inteiro com a mesma proporção da janela;
@@ -569,7 +584,14 @@ function bindMural(board){
     mpan.d0 = 0;
     if (mpan.ptr.size) { const [q] = mpan.ptr.values(); q.x0 = q.x; q.y0 = q.y; mpan.rx = mv.x; mpan.ry = mv.y; return; } // de dois dedos para um: continua sem saltar
     board.classList.remove('drag');
-    if (!mpan.moved) return;
+    if (!mpan.moved) { // toque duplo fora de um post: aproxima naquele ponto
+      if (e.pointerType !== 'mouse' && !e.target.closest('.tile,.mhead')) {
+        const t = mpan.tap;
+        if (t && e.timeStamp - t.t < 320 && Math.hypot(e.clientX - t.x, e.clientY - t.y) < 30) { mpan.tap = null; zoomMural(e.clientX, e.clientY, 2, true); }
+        else mpan.tap = {t:e.timeStamp, x:e.clientX, y:e.clientY};
+      }
+      return;
+    }
     const hs = mpan.hist, a = hs[0], b = hs[hs.length - 1], dt = b && a ? b.t - a.t : 0;
     const stale = b ? e.timeStamp - b.t > 60 : true; // parou antes de soltar: sem inércia
     if (dt > 0 && !stale) glide((b.x - a.x) / dt, (b.y - a.y) / dt); else settleIn();
@@ -584,6 +606,7 @@ function bindMural(board){
     else { const b = bounds(mv.k); mv.x = clampTo(mv.x - e.deltaX * unit, b.x); mv.y = clampTo(mv.y - e.deltaY * unit, b.y); applyMural(); }
     clearTimeout(wheelT); wheelT = setTimeout(() => settleIn(), 140);
   }, {passive:false});
+  board.addEventListener('dblclick', e => { if (!e.target.closest('.tile,.mhead')) zoomMural(e.clientX, e.clientY, e.altKey ? .5 : 2, true); });
   // Navegação por teclado: o foco que cai fora da tela traz a câmera até ele.
   board.addEventListener('focusin', e => {
     if (mpan.ptr.size) return;
