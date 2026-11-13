@@ -159,7 +159,7 @@ html.home,html.home body{height:100%;overflow:hidden;overscroll-behavior:none}
 .corner.bl{bottom:calc(12px + env(safe-area-inset-bottom,0px));left:calc(10px + env(safe-area-inset-left,0px));color:var(--muted-foreground);font-size:13px}
 .corner.br{bottom:calc(12px + env(safe-area-inset-bottom,0px));right:calc(10px + env(safe-area-inset-right,0px));font-variant-numeric:tabular-nums}
 .corner b{font-weight:500}.corner .mut{color:var(--muted-foreground)}
-@media (max-width:640px){.corner.bl,.corner.tl .mut{display:none}.mebar .me span.nm{display:none}}
+@media (max-width:640px){.corner.tc{top:calc(46px + env(safe-area-inset-top,0px))}.corner.bl,.corner.tl .mut{display:none}.mebar .me span.nm{display:none}}
 
 /* ---------- barra de perfil ---------- */
 .mebar{display:flex;align-items:center;gap:14px;font-size:13px}
@@ -199,21 +199,17 @@ html.home,html.home body{height:100%;overflow:hidden;overscroll-behavior:none}
 .sl-r .frame.dv{cursor:pointer}
 .frame .spr{position:absolute;inset:0;background-repeat:no-repeat}
 .corner.tc{top:calc(8px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);padding:0}
-.tm{display:flex;flex-direction:column;gap:10px}
-.tmh{all:unset;cursor:pointer;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;font-size:13px;color:var(--muted-foreground)}
-.tmh b{font-size:18px;font-weight:500;color:var(--foreground);letter-spacing:-.01em}
-.tmh .go{margin-left:auto}
-.tmh:hover .go{color:var(--foreground)}
-.tmh:focus-visible{outline:2px solid var(--ring);outline-offset:4px}
-.tgrid{display:flex;flex-wrap:wrap;gap:8px}
-.pt{all:unset;box-sizing:border-box;position:relative;height:124px;border-radius:4px;overflow:hidden;cursor:pointer;background:var(--muted);flex:none;display:block}
-.pt img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;max-width:none}
-.pt .spr{position:absolute;inset:0;background-repeat:no-repeat}
-.pt.none{border:1px dashed var(--border);background:none;display:grid;place-items:center;font-size:11px;color:var(--muted-foreground)}
-.pt .pv{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:24px;height:24px;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;font-size:9px;display:grid;place-items:center;padding-left:2px}
-.pt .dot{position:absolute;right:5px;bottom:5px;box-shadow:0 0 0 2px var(--background)}
-.pt:hover{outline:2px solid var(--foreground);outline-offset:1px}
-.pt:focus-visible{outline:2px solid var(--ring);outline-offset:2px}
+.board.drag{cursor:grabbing}
+.world{position:absolute;left:0;top:0;transform-origin:0 0;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:200px 170px;padding:120px;width:5520px;will-change:transform}
+.cluster{all:unset;box-sizing:border-box;position:relative;display:block;cursor:pointer;flex:none}
+.cluster .thumbs{display:flex;flex-wrap:wrap;gap:10px;width:1180px;align-items:flex-start;justify-content:center;min-height:300px}
+.cluster .thumbs img{height:150px;object-fit:cover;max-width:none;display:block;border-radius:3px;pointer-events:none}
+.cluster .thumbs .tsp{display:block;height:150px;border-radius:3px;background-repeat:no-repeat;flex:none}
+.mlabel{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:210px;font-weight:500;letter-spacing:-.04em;line-height:1;white-space:nowrap;color:var(--foreground);-webkit-text-stroke:14px var(--background);paint-order:stroke fill}
+.mlabel sup{font-size:.26em;font-weight:400;color:var(--muted-foreground);letter-spacing:0;margin-left:10px;vertical-align:top;position:relative;top:.35em;-webkit-text-stroke:8px var(--background);paint-order:stroke fill}
+.msub{position:absolute;left:50%;top:calc(50% + 135px);transform:translateX(-50%);white-space:nowrap;font-size:34px;background:var(--background);padding:4px 16px;color:var(--muted-foreground)}
+.cluster:hover .mlabel{text-decoration:underline;text-decoration-thickness:8px;text-underline-offset:18px}
+.cluster:focus-visible{outline:6px solid var(--ring);outline-offset:30px}
 .row span.th{background-repeat:no-repeat;display:block}
 .frame .rm{all:unset;cursor:pointer;position:absolute;top:6px;right:6px;width:22px;height:22px;border-radius:50%;background:var(--background);border:1px solid var(--border);display:grid;place-items:center;font-size:13px;color:var(--foreground)}
 .frame .vtag{position:absolute;top:6px;left:6px;background:var(--background);border:1px solid var(--border);border-radius:4px;padding:0 6px;font-size:11px;color:var(--foreground)}
@@ -263,9 +259,9 @@ let db = null, user = null, assets = null, local = false;
 let me = {id:null, name:'', avatar:'', canEdit:false};
 const S = {state:{}, comments:{}, members:{}, notifs:{}};
 const profiles = {}, asked = new Set();
-const ui = {month:null, home:'graph', view:'cal', fStatus:null, fAnim:false, open:null, pin:null, panel:null, mentions:[], busy:false};
+const ui = {month:null, home:'mural', view:'cal', fStatus:null, fAnim:false, open:null, pin:null, panel:null, mentions:[], busy:false};
 const view = {x:0, y:0, k:1, fitted:false};
-try { if (localStorage.getItem('cron-home') === 'thumbs') ui.home = 'thumbs'; } catch(e){}
+try { if (localStorage.getItem('cron-home') === 'graph') ui.home = 'graph'; } catch(e){}
 try { const v = localStorage.getItem('cron-view2'); if (['slides','cal','list'].includes(v)) ui.view = v; } catch(e){}
 
 /* ---------- utilidades ---------- */
@@ -369,37 +365,50 @@ function buildGraph(){
 }
 const ALPHA = {em_aprovacao:1, ajuste:1, aprovado:.8, insumos:.5, postado:.38, none:.24};
 let homeSig = '';
-const homeSeg = () => h('div', {class:'seg', role:'group', 'aria-label':'Visão geral'}, [['graph','Grafo'],['thumbs','Miniaturas']].map(([k, n]) =>
+const homeSeg = () => h('div', {class:'seg', role:'group', 'aria-label':'Visão geral'}, [['mural','Mural'],['graph','Grafo']].map(([k, n]) =>
   h('button', {'aria-pressed':String(ui.home === k), onclick:() => { ui.home = k; try { localStorage.setItem('cron-home', k); } catch(e){} scrollTo(0, 0); render(true); }, text:n})));
-function thumbEl(p){
-  const fs = framesOf(p).filter(f => f.kind === 'image' || f.kind === 'sprite' || (f.kind === 'dvideo' && (f.src || f.sp))), s = statusOf(p);
-  const f = fs.find(f => !f.sp || f.sp[3] / f.sp[4] < 1.1) || fs[0]; // prefere a peça em pé; molduras largas do slide ficam por último
-  const b = h('button', {class:'pt s-' + s, title:`${dateLabel(p)} · ${FMT[p.fmt]} · ${ST[s]}`, 'aria-label':`${dateLabel(p)}, ${FMT[p.fmt]}, ${p.title}`, onclick:() => { enter(p.month); openPost(p.id); }});
-  if (f && f.sp) { b.style.width = Math.round(124 * f.sp[3] / f.sp[4]) + 'px'; b.append(h('span', {class:'spr', style:sprite(f.month, f.sp)})); }
-  else if (f) { b.style.width = (p.vertical ? 70 : 99) + 'px'; b.append(h('img', {src:f.src, alt:'', loading:'lazy'})); }
-  else { b.style.width = '70px'; b.classList.add('none'); b.append(h('span', {text:FMT[p.fmt]})); }
-  if (f && f.kind === 'dvideo') b.append(h('span', {class:'pv', 'aria-hidden':'true', text:'▶'}));
-  b.append(h('i', {class:'dot'}));
-  return b;
-}
-function renderThumbs(){
-  const sig = JSON.stringify(['t', POSTS.map(p => statusOf(p)).join(), unread(), me.name, roleOf(me.id), local]);
+// Mural: todas as peças de cada mês num canvas navegável; clicar num mês abre o cronograma dele.
+const mv = {x:0, y:0, k:1, fitted:false}, mpan = {ptr:new Map(), moved:false, d0:0};
+function applyMural(){ const w = $('#world'); if (!w) return; w.style.transform = `translate(${mv.x}px,${mv.y}px) scale(${mv.k})`; const z = $('#zoom'); if (z) z.textContent = Math.round(mv.k * 100) + '%'; }
+function fitMural(){ const w = $('#world'); if (!w) return; mv.k = Math.min(innerWidth / w.offsetWidth, (innerHeight - 70) / w.offsetHeight, 1); mv.x = (innerWidth - w.offsetWidth * mv.k) / 2; mv.y = (innerHeight - w.offsetHeight * mv.k) / 2 + 10; mv.fitted = true; applyMural(); }
+function zoomMural(cx, cy, f){ const k = Math.min(3, Math.max(.05, mv.k * f)), r = k / mv.k; mv.x = cx - (cx - mv.x) * r; mv.y = cy - (cy - mv.y) * r; mv.k = k; applyMural(); }
+function renderMural(){
+  const stats = MONTHS.map(m => { const ps = POSTS.filter(p => p.month === m.k), c = s => ps.filter(p => statusOf(p) === s).length; return [c('aprovado') + c('postado'), c('em_aprovacao') + c('ajuste'), ps.reduce((n, p) => n + openCount(p), 0)]; });
+  const sig = JSON.stringify(['m', stats, unread(), me.name, roleOf(me.id), local]);
   const app = $('#app');
-  if (sig === homeSig && app.dataset.v === 'thumbs') return;
-  homeSig = sig; app.dataset.v = 'thumbs';
-  app.replaceChildren(
-    h('header', {class:'top'}, h('div', {class:'wrap'}, h('div', {class:'brand'}, h('small', {text:'Everest'}), h('h1', {text:'Cronogramas 2026'})), homeSeg(), meBar())),
-    h('main', {class:'wrap'}, local && h('p', {class:'banner', text:'Modo demonstração: sem conexão com o armazenamento, então status e comentários não são salvos.'}),
-      [...MONTHS].reverse().map(m => {
-        const ps = POSTS.filter(p => p.month === m.k); if (!ps.length) return null;
-        const c = s => ps.filter(p => statusOf(p) === s).length, open = ps.reduce((n, p) => n + openCount(p), 0);
-        return h('section', {class:'tm'},
-          h('button', {class:'tmh', onclick:() => enter(m.k)}, h('b', {text:m.n}), h('span', {text:`${ps.length} posts · ${c('aprovado') + c('postado')} aprovados ou postados · ${c('em_aprovacao') + c('ajuste')} em aprovação ou ajuste${open ? ` · ${open} comentários abertos` : ''}`}), h('span', {class:'go', text:'Abrir →'})),
-          h('div', {class:'tgrid'}, ps.map(thumbEl)));
-      })));
+  if (sig === homeSig && app.dataset.v === 'mural') return;
+  homeSig = sig; app.dataset.v = 'mural';
+  const world = h('div', {class:'world', id:'world'}, MONTHS.map((m, i) => {
+    const ps = POSTS.filter(p => p.month === m.k), st = stats[i];
+    const pieces = ps.flatMap(p => framesOf(p).filter(f => f.kind === 'image' || (f.kind === 'sprite' && f.sp[3] / f.sp[4] < 1.25) || (f.kind === 'dvideo' && (f.src || f.sp))).map(f =>
+      f.sp ? h('span', {class:'tsp', style:`width:${Math.round(150 * f.sp[3] / f.sp[4])}px;${sprite(f.month, f.sp)}`}) : h('img', {src:f.src, alt:'', draggable:'false', loading:'lazy', style:`width:${p.vertical ? 84 : 120}px`})));
+    return h('button', {class:'cluster' + (ps.length ? '' : ' empty'), 'aria-label':`Abrir ${m.n}`, onclick:() => { if (!mpan.moved) enter(m.k); }},
+      h('div', {class:'thumbs'}, pieces),
+      h('div', {class:'mlabel'}, m.n, ps.length ? h('sup', {text:ps.length}) : null),
+      h('div', {class:'msub', text:ps.length ? `${st[0]} aprovados ou postados · ${st[1]} em aprovação ou ajuste · ${st[2]} comentários abertos` : 'Ainda sem posts'}));
+  }));
+  const board = h('div', {class:'board', id:'mural'}, world);
+  app.replaceChildren(board,
+    h('div', {class:'corner tl'}, h('b', {text:'Everest'}), h('span', {class:'mut', text:'Cronogramas 2026'})),
+    h('div', {class:'corner tr'}, meBar()),
+    h('div', {class:'corner tc'}, homeSeg()),
+    h('div', {class:'corner bl', text:local ? 'Modo demonstração: nada é salvo fora deste navegador' : 'Arraste para navegar · role para dar zoom · clique em um mês para abrir'}),
+    h('div', {class:'corner br'}, h('button', {class:'tbtn', onclick:() => zoomMural(innerWidth / 2, innerHeight / 2, 1 / 1.3), 'aria-label':'Diminuir zoom', text:'−'}), h('span', {id:'zoom'}),
+      h('button', {class:'tbtn', onclick:() => zoomMural(innerWidth / 2, innerHeight / 2, 1.3), 'aria-label':'Aumentar zoom', text:'+'}), h('button', {class:'tbtn', onclick:fitMural, text:'Ajustar'})));
+  board.addEventListener('pointerdown', e => { mpan.ptr.set(e.pointerId, {x:e.clientX, y:e.clientY}); if (mpan.ptr.size === 1) mpan.moved = false; mpan.d0 = 0; board.classList.add('drag'); });
+  board.addEventListener('pointermove', e => {
+    const p = mpan.ptr.get(e.pointerId); if (!p) return;
+    const dx = e.clientX - p.x, dy = e.clientY - p.y;
+    if (mpan.ptr.size === 1) { if (Math.abs(dx) + Math.abs(dy) > 4) mpan.moved = true; if (mpan.moved) { mv.x += dx; mv.y += dy; applyMural(); p.x = e.clientX; p.y = e.clientY; } }
+    else { p.x = e.clientX; p.y = e.clientY; const [a, c] = [...mpan.ptr.values()], d = Math.hypot(a.x - c.x, a.y - c.y); if (mpan.d0) zoomMural((a.x + c.x) / 2, (a.y + c.y) / 2, d / mpan.d0); mpan.d0 = d; mpan.moved = true; }
+  });
+  const up = e => { mpan.ptr.delete(e.pointerId); mpan.d0 = 0; if (!mpan.ptr.size) board.classList.remove('drag'); };
+  board.addEventListener('pointerup', up); board.addEventListener('pointercancel', up); board.addEventListener('pointerleave', up);
+  board.addEventListener('wheel', e => { e.preventDefault(); zoomMural(e.clientX, e.clientY, Math.exp(-e.deltaY * (e.ctrlKey ? .01 : .0018))); }, {passive:false});
+  if (!mv.fitted) fitMural(); else applyMural();
 }
 function renderHome(){
-  if (ui.home === 'thumbs') return renderThumbs();
+  if (ui.home === 'mural') return renderMural();
   const sig = JSON.stringify([unread(), me.name, roleOf(me.id), local]);
   const app = $('#app');
   if (sig !== homeSig || app.dataset.v !== 'home') {
@@ -720,9 +729,9 @@ function enter(k){ ui.month = k; ui.fStatus = null; ui.fAnim = false; try { loca
 function goHome(){ ui.month = null; try { location.hash = ''; } catch(e){} render(); }
 addEventListener('hashchange', () => { const k = location.hash.slice(1), ok = MONTHS.some(m => m.k === k); if ((ok ? k : null) !== ui.month) { ui.month = ok ? k : null; closeOverlay(); render(); } });
 addEventListener('keydown', e => { if (e.key === 'Escape' && (ui.open || ui.panel)) closeOverlay(); });
-addEventListener('resize', () => { if (!ui.month && ui.home === 'graph') { sizeCanvas(); fit(); } });
+addEventListener('resize', () => { if (ui.month) return; if (ui.home === 'graph') { sizeCanvas(); fit(); } else fitMural(); });
 function render(f){
-  document.documentElement.classList.toggle('home', !ui.month && ui.home === 'graph');
+  document.documentElement.classList.toggle('home', !ui.month);
   if (f) { homeSig = ''; mainSig = ''; }
   if (ui.month) renderMonth(); else renderHome();
   renderDrawer(f);

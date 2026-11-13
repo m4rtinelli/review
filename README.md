@@ -31,7 +31,7 @@ tools/video_covers.py     gera as capas dos vídeos de um mês (sp/<mês>-vN.jpg
 
 ## Telas
 
-- **Cronogramas**: duas visões, alternadas no topo. Miniaturas mostra uma imagem por post, agrupadas por mês. Grafo é navegável (arrastar e zoom). Os meses ficam em círculo e cada post é um ponto ligado ao seu mês; o brilho do ponto indica o status e o tamanho, a quantidade de peças.
+- **Cronogramas**: duas visões, alternadas no topo. Mural é um canvas navegável com todas as peças de cada mês e o nome do mês por cima; clicar no mês abre o cronograma. Grafo é navegável (arrastar e zoom). Os meses ficam em círculo e cada post é um ponto ligado ao seu mês; o brilho do ponto indica o status e o tamanho, a quantidade de peças.
 - **Mês**: três visualizações do mesmo conteúdo: Slides (um slide por post), Calendário e Lista.
 - **Post**: gaveta lateral com criativo, arquivos finais do Drive, legenda, insight e comentários. Clicar numa peça fixa o comentário naquele ponto.
 - **Notificações** e **Pessoas**: avisos de `@` e perfis (Admin, Usuário, Cliente).
