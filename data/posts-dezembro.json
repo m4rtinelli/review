@@ -18,7 +18,11 @@
   "vids": [
    "1VQrwBfz9SSvfwoZyVx-3iPTixCyv8Euz"
   ],
-  "files": []
+  "files": [],
+  "vc": [
+   "1VQrwBfz9SSvfwoZyVx-3iPTixCyv8Euz"
+  ],
+  "vcs": {}
  },
  {
   "id": "dezembro-p9",
@@ -73,7 +77,9 @@
    ]
   ],
   "vids": [],
-  "files": []
+  "files": [],
+  "vc": [],
+  "vcs": {}
  },
  {
   "id": "dezembro-p7",
@@ -107,7 +113,9 @@
    ]
   ],
   "vids": [],
-  "files": []
+  "files": [],
+  "vc": [],
+  "vcs": {}
  },
  {
   "id": "dezembro-p6",
@@ -128,7 +136,11 @@
   "vids": [
    "1qU2jS5tcs2UNCyYUYuEfcasyY-Fvih8V"
   ],
-  "files": []
+  "files": [],
+  "vc": [
+   "1qU2jS5tcs2UNCyYUYuEfcasyY-Fvih8V"
+  ],
+  "vcs": {}
  },
  {
   "id": "dezembro-p4",
@@ -169,7 +181,9 @@
    ]
   ],
   "vids": [],
-  "files": []
+  "files": [],
+  "vc": [],
+  "vcs": {}
  },
  {
   "id": "dezembro-p5",
@@ -190,6 +204,10 @@
   "vids": [
    "1-GKkvS7_KiBSIjNW1CKBNKO4DvceRhec"
   ],
-  "files": []
+  "files": [],
+  "vc": [
+   "1-GKkvS7_KiBSIjNW1CKBNKO4DvceRhec"
+  ],
+  "vcs": {}
  }
 ]

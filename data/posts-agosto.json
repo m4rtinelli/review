@@ -18,7 +18,17 @@
   "vids": [
    "1Yv-0rqZiF2rCoqdW0Pp_CFQiBknvVTwI"
   ],
-  "files": []
+  "files": [],
+  "vcs": {
+   "1Yv-0rqZiF2rCoqdW0Pp_CFQiBknvVTwI": [
+    "v1",
+    2,
+    1,
+    405,
+    720
+   ]
+  },
+  "vc": []
  },
  {
   "id": "agosto-p46",
@@ -39,7 +49,17 @@
   "vids": [
    "1VC7WdRaX4MNAKENQVlhSonNz1o-OQEfw"
   ],
-  "files": []
+  "files": [],
+  "vcs": {
+   "1VC7WdRaX4MNAKENQVlhSonNz1o-OQEfw": [
+    "v1",
+    3,
+    1,
+    404,
+    720
+   ]
+  },
+  "vc": []
  },
  {
   "id": "agosto-p47",
@@ -58,7 +78,9 @@
   "imgs": [],
   "sp": [],
   "vids": [],
-  "files": []
+  "files": [],
+  "vcs": {},
+  "vc": []
  },
  {
   "id": "agosto-p44",
@@ -79,7 +101,17 @@
   "vids": [
    "1OsuLjtM_j52oigKVd4l8o9hBq0gIrNh0"
   ],
-  "files": []
+  "files": [],
+  "vcs": {
+   "1OsuLjtM_j52oigKVd4l8o9hBq0gIrNh0": [
+    "v1",
+    1,
+    1,
+    405,
+    720
+   ]
+  },
+  "vc": []
  },
  {
   "id": "agosto-p41",
@@ -143,7 +175,17 @@
   "vids": [
    "1jlwGfHD0Q8OrlwIIjkVd_m86Wv9ql029"
   ],
-  "files": []
+  "files": [],
+  "vcs": {
+   "1jlwGfHD0Q8OrlwIIjkVd_m86Wv9ql029": [
+    "v1",
+    0,
+    1,
+    405,
+    507
+   ]
+  },
+  "vc": []
  },
  {
   "id": "agosto-p40",
@@ -164,7 +206,17 @@
   "vids": [
    "1fzy4yHla7WK_xYwd9vxnY15ztegKuFLW"
   ],
-  "files": []
+  "files": [],
+  "vcs": {
+   "1fzy4yHla7WK_xYwd9vxnY15ztegKuFLW": [
+    "v1",
+    3,
+    0,
+    404,
+    720
+   ]
+  },
+  "vc": []
  },
  {
   "id": "agosto-p38",
@@ -183,7 +235,9 @@
   "imgs": [],
   "sp": [],
   "vids": [],
-  "files": []
+  "files": [],
+  "vcs": {},
+  "vc": []
  },
  {
   "id": "agosto-p39",
@@ -205,7 +259,24 @@
    "1jekiuKBrDySR7q5CUKhNFoR2kh1wfmp0",
    "1x1RzLmqcvQcr7K0-8pUVpYNsI9GWjJ17"
   ],
-  "files": []
+  "files": [],
+  "vcs": {
+   "1jekiuKBrDySR7q5CUKhNFoR2kh1wfmp0": [
+    "v1",
+    1,
+    0,
+    405,
+    719
+   ],
+   "1x1RzLmqcvQcr7K0-8pUVpYNsI9GWjJ17": [
+    "v1",
+    2,
+    0,
+    405,
+    719
+   ]
+  },
+  "vc": []
  },
  {
   "id": "agosto-p36",
@@ -226,7 +297,17 @@
   "vids": [
    "1h-N5Vxavd2XohlXl4bfzXDwkbpbYCklw"
   ],
-  "files": []
+  "files": [],
+  "vcs": {
+   "1h-N5Vxavd2XohlXl4bfzXDwkbpbYCklw": [
+    "v1",
+    0,
+    0,
+    405,
+    720
+   ]
+  },
+  "vc": []
  },
  {
   "id": "agosto-p37",
@@ -260,7 +341,9 @@
    ]
   ],
   "vids": [],
-  "files": []
+  "files": [],
+  "vcs": {},
+  "vc": []
  },
  {
   "id": "agosto-p34",
@@ -281,7 +364,17 @@
   "vids": [
    "1mvQ-ZJAqx5qZChfbAWt12bPQzR1Z94Xm"
   ],
-  "files": []
+  "files": [],
+  "vcs": {
+   "1mvQ-ZJAqx5qZChfbAWt12bPQzR1Z94Xm": [
+    "v0",
+    3,
+    3,
+    405,
+    719
+   ]
+  },
+  "vc": []
  },
  {
   "id": "agosto-p35",
@@ -308,7 +401,9 @@
    ]
   ],
   "vids": [],
-  "files": []
+  "files": [],
+  "vcs": {},
+  "vc": []
  },
  {
   "id": "agosto-p33",
@@ -329,7 +424,17 @@
   "vids": [
    "1VCnu4GWh2GznlxsfD8K5phw_-YOB49AW"
   ],
-  "files": []
+  "files": [],
+  "vcs": {
+   "1VCnu4GWh2GznlxsfD8K5phw_-YOB49AW": [
+    "v0",
+    2,
+    3,
+    405,
+    720
+   ]
+  },
+  "vc": []
  },
  {
   "id": "agosto-p32",
@@ -350,7 +455,17 @@
   "vids": [
    "15N2PTQFiZFrn6dvhi8F3_dgmN7lmPgis"
   ],
-  "files": []
+  "files": [],
+  "vcs": {
+   "15N2PTQFiZFrn6dvhi8F3_dgmN7lmPgis": [
+    "v0",
+    1,
+    3,
+    405,
+    720
+   ]
+  },
+  "vc": []
  },
  {
   "id": "agosto-p31",
@@ -371,7 +486,17 @@
   "vids": [
    "1kfm6KEQHlaupFGoaXlZZHWZ6spYn4vUZ"
   ],
-  "files": []
+  "files": [],
+  "vcs": {
+   "1kfm6KEQHlaupFGoaXlZZHWZ6spYn4vUZ": [
+    "v0",
+    0,
+    3,
+    405,
+    506
+   ]
+  },
+  "vc": []
  },
  {
   "id": "agosto-p30",
@@ -390,7 +515,9 @@
   "imgs": [],
   "sp": [],
   "vids": [],
-  "files": []
+  "files": [],
+  "vcs": {},
+  "vc": []
  },
  {
   "id": "agosto-p48",
@@ -431,7 +558,9 @@
    ]
   ],
   "vids": [],
-  "files": []
+  "files": [],
+  "vcs": {},
+  "vc": []
  },
  {
   "id": "agosto-p28",
@@ -460,7 +589,17 @@
   "vids": [
    "1MkWaPFDWbyKx6usu-da4YhVOxn6GUrgM"
   ],
-  "files": []
+  "files": [],
+  "vcs": {
+   "1MkWaPFDWbyKx6usu-da4YhVOxn6GUrgM": [
+    "v0",
+    2,
+    2,
+    405,
+    720
+   ]
+  },
+  "vc": []
  },
  {
   "id": "agosto-p29",
@@ -481,7 +620,17 @@
   "vids": [
    "1ZPbLd3Eattv6g4AFpuDQrZRvPmv3H6J1"
   ],
-  "files": []
+  "files": [],
+  "vcs": {
+   "1ZPbLd3Eattv6g4AFpuDQrZRvPmv3H6J1": [
+    "v0",
+    3,
+    2,
+    405,
+    720
+   ]
+  },
+  "vc": []
  },
  {
   "id": "agosto-p25",
@@ -502,7 +651,17 @@
   "vids": [
    "1xH9cmh_krq7GrfDJVfMwbvyJGkib9YuJ"
   ],
-  "files": []
+  "files": [],
+  "vcs": {
+   "1xH9cmh_krq7GrfDJVfMwbvyJGkib9YuJ": [
+    "v0",
+    1,
+    2,
+    405,
+    720
+   ]
+  },
+  "vc": []
  },
  {
   "id": "agosto-p26",
@@ -543,7 +702,9 @@
    ]
   ],
   "vids": [],
-  "files": []
+  "files": [],
+  "vcs": {},
+  "vc": []
  },
  {
   "id": "agosto-p23",
@@ -564,7 +725,17 @@
   "vids": [
    "1v9FmPj3IwWDzz4ma-C4cimRiquQAlFwQ"
   ],
-  "files": []
+  "files": [],
+  "vcs": {
+   "1v9FmPj3IwWDzz4ma-C4cimRiquQAlFwQ": [
+    "v0",
+    0,
+    2,
+    405,
+    720
+   ]
+  },
+  "vc": []
  },
  {
   "id": "agosto-p24",
@@ -598,7 +769,9 @@
    ]
   ],
   "vids": [],
-  "files": []
+  "files": [],
+  "vcs": {},
+  "vc": []
  },
  {
   "id": "agosto-p21",
@@ -619,7 +792,17 @@
   "vids": [
    "1Giq0BuiQRnT-r2fLa9KJ9C4r-Jx7uu5p"
   ],
-  "files": []
+  "files": [],
+  "vcs": {
+   "1Giq0BuiQRnT-r2fLa9KJ9C4r-Jx7uu5p": [
+    "v0",
+    3,
+    1,
+    405,
+    720
+   ]
+  },
+  "vc": []
  },
  {
   "id": "agosto-p22",
@@ -638,7 +821,9 @@
   "imgs": [],
   "sp": [],
   "vids": [],
-  "files": []
+  "files": [],
+  "vcs": {},
+  "vc": []
  },
  {
   "id": "agosto-p20",
@@ -659,7 +844,17 @@
   "vids": [
    "1h3V-k-yw4YQFUd87Gsx6A8lHi_hPnq7d"
   ],
-  "files": []
+  "files": [],
+  "vcs": {
+   "1h3V-k-yw4YQFUd87Gsx6A8lHi_hPnq7d": [
+    "v0",
+    2,
+    1,
+    405,
+    507
+   ]
+  },
+  "vc": []
  },
  {
   "id": "agosto-p19",
@@ -680,7 +875,17 @@
   "vids": [
    "1e67-Uc8gfMNKjGEJTwMJxWkyphRKgDLV"
   ],
-  "files": []
+  "files": [],
+  "vcs": {
+   "1e67-Uc8gfMNKjGEJTwMJxWkyphRKgDLV": [
+    "v0",
+    1,
+    1,
+    405,
+    720
+   ]
+  },
+  "vc": []
  },
  {
   "id": "agosto-p14",
@@ -701,7 +906,17 @@
   "vids": [
    "1LdTW_y5F4-mcqx8wUuuD57JdBDRZscyA"
   ],
-  "files": []
+  "files": [],
+  "vcs": {
+   "1LdTW_y5F4-mcqx8wUuuD57JdBDRZscyA": [
+    "v0",
+    3,
+    0,
+    405,
+    719
+   ]
+  },
+  "vc": []
  },
  {
   "id": "agosto-p15",
@@ -722,7 +937,17 @@
   "vids": [
    "1dQs7krCm4woN1jTh8PBxt40olhwSqaW3"
   ],
-  "files": []
+  "files": [],
+  "vcs": {
+   "1dQs7krCm4woN1jTh8PBxt40olhwSqaW3": [
+    "v0",
+    0,
+    1,
+    405,
+    720
+   ]
+  },
+  "vc": []
  },
  {
   "id": "agosto-p16",
@@ -784,7 +1009,9 @@
    ]
   ],
   "vids": [],
-  "files": []
+  "files": [],
+  "vcs": {},
+  "vc": []
  },
  {
   "id": "agosto-p12",
@@ -846,7 +1073,9 @@
    ]
   ],
   "vids": [],
-  "files": []
+  "files": [],
+  "vcs": {},
+  "vc": []
  },
  {
   "id": "agosto-p10",
@@ -865,7 +1094,9 @@
   "imgs": [],
   "sp": [],
   "vids": [],
-  "files": []
+  "files": [],
+  "vcs": {},
+  "vc": []
  },
  {
   "id": "agosto-p11",
@@ -899,7 +1130,9 @@
    ]
   ],
   "vids": [],
-  "files": []
+  "files": [],
+  "vcs": {},
+  "vc": []
  },
  {
   "id": "agosto-p9",
@@ -920,7 +1153,17 @@
   "vids": [
    "16nWcMLwDwjYXVZcZFz5VDVejmEo9CGsr"
   ],
-  "files": []
+  "files": [],
+  "vcs": {
+   "16nWcMLwDwjYXVZcZFz5VDVejmEo9CGsr": [
+    "v0",
+    2,
+    0,
+    405,
+    506
+   ]
+  },
+  "vc": []
  },
  {
   "id": "agosto-p6",
@@ -941,7 +1184,17 @@
   "vids": [
    "140wYzNkEVKgQFm8V7ZxSCnc-maKqUrUz"
   ],
-  "files": []
+  "files": [],
+  "vcs": {
+   "140wYzNkEVKgQFm8V7ZxSCnc-maKqUrUz": [
+    "v0",
+    1,
+    0,
+    405,
+    720
+   ]
+  },
+  "vc": []
  },
  {
   "id": "agosto-p7",
@@ -960,7 +1213,9 @@
   "imgs": [],
   "sp": [],
   "vids": [],
-  "files": []
+  "files": [],
+  "vcs": {},
+  "vc": []
  },
  {
   "id": "agosto-p8",
@@ -1001,7 +1256,9 @@
    ]
   ],
   "vids": [],
-  "files": []
+  "files": [],
+  "vcs": {},
+  "vc": []
  },
  {
   "id": "agosto-p5",
@@ -1020,7 +1277,9 @@
   "imgs": [],
   "sp": [],
   "vids": [],
-  "files": []
+  "files": [],
+  "vcs": {},
+  "vc": []
  },
  {
   "id": "agosto-p3",
@@ -1041,6 +1300,16 @@
   "vids": [
    "1pXsP9HfAmcsTLfenw_vyy8fCf03aqt7P"
   ],
-  "files": []
+  "files": [],
+  "vcs": {
+   "1pXsP9HfAmcsTLfenw_vyy8fCf03aqt7P": [
+    "v0",
+    0,
+    0,
+    405,
+    720
+   ]
+  },
+  "vc": []
  }
 ]

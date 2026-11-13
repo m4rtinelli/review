@@ -26,11 +26,12 @@ vid/                      capas dos vídeos de novembro, recortadas do Google Sl
 sp/                       imagens dos outros meses, tiradas dos slides, em folhas de 16 peças (<mês>-N.jpg)
 data/posts-<mês>.json     cópia legível dos posts de cada mês, que estão embutidos no index.html
 tools/import_month.py     importa um deck do Google Slides para data/ e sp/
+tools/video_covers.py     gera as capas dos vídeos de um mês (sp/<mês>-vN.jpg)
 ```
 
 ## Telas
 
-- **Cronogramas**: grafo navegável (arrastar e zoom). Os meses ficam em círculo e cada post é um ponto ligado ao seu mês; o brilho do ponto indica o status e o tamanho, a quantidade de peças.
+- **Cronogramas**: duas visões, alternadas no topo. Miniaturas mostra uma imagem por post, agrupadas por mês. Grafo é navegável (arrastar e zoom). Os meses ficam em círculo e cada post é um ponto ligado ao seu mês; o brilho do ponto indica o status e o tamanho, a quantidade de peças.
 - **Mês**: três visualizações do mesmo conteúdo: Slides (um slide por post), Calendário e Lista.
 - **Post**: gaveta lateral com criativo, arquivos finais do Drive, legenda, insight e comentários. Clicar numa peça fixa o comentário naquele ponto.
 - **Notificações** e **Pessoas**: avisos de `@` e perfis (Admin, Usuário, Cliente).
@@ -50,11 +51,11 @@ Regras de acesso: `state` e `members` só são alterados por quem pode editar o 
 
 - Textos e status: decks "CRONOGRAMA EVEREST | <MÊS> 2026" do Google Slides, de maio a dezembro.
 - Novembro: artes do Figma "Everest - Social Ciclos" (página NOVEMBRO) e arquivos finais da pasta `11_NOVEMBRO` do Drive.
-- Outros meses: imagens que estão nos próprios slides. Vídeos aparecem sem capa, com link para o Drive.
+- Outros meses: imagens que estão nos próprios slides. As capas de vídeo são recortes do slide e o clique abre o arquivo no Drive.
 
 ## Pendências
 
-- Capas de vídeo e arquivos finais do Drive para os meses fora de novembro.
+- Arquivos finais do Drive para os meses fora de novembro.
 - Janeiro a abril de 2026 (os decks existem no Drive, ainda não importados).
 - Criar e editar posts pelo app.
 - Notificação por e-mail (a plataforma não envia; precisa de servidor próprio).
